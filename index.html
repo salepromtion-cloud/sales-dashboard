@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Sales Dashboard</title>
+
+  <!-- Firebase v8 (Browser) -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+
+  <!-- Google Charts -->
+  <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <style>
+    :root{
+      --bg:#f6f7fb; --card:#ffffff;
+      --accent:#f6c000; --accent-dark:#e0ad00;
+      --green:#8bc34a; --red:#e53935; --muted:#6b7280;
+      --primary:#1e3a8a;
+      --radius:12px;
+    }
+    body{font-family:Inter, Arial, sans-serif; margin:0; padding:18px; background:var(--bg); color:#0f172a;}
+    .container{max-width:1080px; margin:0 auto;}
+    header{display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:18px}
+    h1{margin:0; font-size:28px; color:var(--primary)}
+    .top-actions{display:flex; gap:8px; align-items:center}
+    button.btn{background:var(--primary); color:#fff; border:none; padding:8px 12px; border-radius:8px; cursor:pointer}
+    button.btn.secondary{background:#fff; color:var(--primary); border:1px solid #d1d5db}
+    .profile{font-size:14px; color:var(--muted)}
+    .grid{display:grid; grid-template-columns: repeat(12, 1fr); gap:14px;}
+    .card{background:var(--card); border-radius:var(--radius); padding:14px; box-shadow:0 6px 18px rgba(15,23,42,0.06)}
+    .kpi {display:flex; gap:12px; align-items:center}
+    .kpi .tile{flex:1; padding:12px; border-radius:10px; background:linear-gradient(180deg,#fff,#fbfbfb); text-align:center}
+    .kpi .tile h4{margin:0; font-size:12px; color:var(--muted)}
+    .kpi .tile p{margin:6px 0 0; font-weight:700; font-size:18px}
+    .kpi .tile.small{padding:10px}
+    .section-title{font-weight:700; font-size:14px; color:var(--primary); margin-bottom:8px}
+    /* layout boxes */
+    .left-col{grid-column:span 8}
+    .right-col{grid-column:span 4}
+    /* charts area */
+    #chart_bar, #chart_donut{width:100%; height:320px}
+    /* two rows inside cards */
+    .row-flex{display:flex; gap:12px; flex-wrap:wrap}
+    .half{flex:1}
+    .big-rank{background:#6b21a8; color:#fff; padding:24px; border-radius:10px; text-align:center; font-size:22px}
+    .small-box{padding:12px; border-radius:8px; background:linear-gradient(180deg,#fff,#fafafa); text-align:center}
+    /* responsive */
+    @media (max-width:880px){
+      .left-col{grid-column:span 12}
+      .right-col{grid-column:span 12}
+      header{flex-direction:column; align-items:flex-start}
+      #chart_bar, #chart_donut{height:260px}
+    }
+    /* nice colors for KPI metrics */
+    .target {background:linear-gradient(180deg,#fff8e1,#fff3c6)}
+    .achieved {background:linear-gradient(180deg,#ecfdf5,#ccf5df)}
+    .pending {background:linear-gradient(180deg,#fff5f5,#ffdcdc)}
+    .percent {background:linear-gradient(180deg,#fff7ed,#fff0d6)}
+    .yesterday {background:#fffde7}
+    .label-muted{color:var(--muted); font-size:13px}
+    .small-value{font-size:18px; font-weight:700}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div>
+        <h1>Your Sales Performance Report <span id="reportDate" style="font-size:14px;color:var(--muted);font-weight:600"></span></h1>
+        <div class="profile" id="userInfo">Please login to view your sales</div>
+      </div>
+      <div class="top-actions">
+        <button id="loginBtn" class="btn">Login with Google</button>
+        <button id="logoutBtn" class="btn secondary" style="display:none">Logout</button>
+      </div>
+    </header>
+
+    <div class="grid">
+      <!-- main left column -->
+      <div class="card left-col">
+        <div class="section-title">Pharma Performance</div>
+
+        <div class="kpi" style="margin-bottom:12px">
+          <div class="tile target">
+            <h4>Target Pharma</h4>
+            <p id="targetPharma">-</p>
+          </div>
+          <div class="tile achieved">
+            <h4>Achieved Pharma</h4>
+            <p id="pharmaSales">-</p>
+          </div>
+          <div class="tile pending">
+            <h4>Pending Pharma</h4>
+            <p id="pendingPharma">-</p>
+          </div>
+          <div class="tile percent">
+            <h4>Achieved % (Pharma)</h4>
+            <p id="achievedPharmaPercent">-</p>
+          </div>
+        </div>
+
+        <div class="section-title">Livesay / Trucure (PL)</div>
+        <div class="kpi" style="margin-bottom:12px">
+          <div class="tile target">
+            <h4>Target PL</h4>
+            <p id="targetPL">-</p>
+          </div>
+          <div class="tile achieved">
+            <h4>Achieved PL</h4>
+            <p id="plSales">-</p>
+          </div>
+          <div class="tile pending">
+            <h4>Pending PL</h4>
+            <p id="pendingPL">-</p>
+          </div>
+          <div class="tile percent">
+            <h4>Achieved % (PL)</h4>
+            <p id="achievedPLPercent">-</p>
+          </div>
+        </div>
+
+        <div style="margin-top:8px" class="row-flex">
+          <div class="half card small-box">
+            <div class="label-muted">Current Run Rate</div>
+            <div class="small-value" id="currentRunRate">-</div>
+          </div>
+          <div class="half card small-box">
+            <div class="label-muted">Required Run Rate</div>
+            <div class="small-value" id="requiredRunRate">-</div>
+          </div>
+        </div>
+
+        <div style="margin-top:16px" class="section-title">Target vs Achievement</div>
+        <div id="chart_bar" class="card"></div>
+
+      </div>
+
+      <!-- right column -->
+      <div class="card right-col">
+        <div style="display:flex; justify-content:space-between; align-items:center">
+          <div class="section-title">Summary</div>
+          <div class="label-muted" id="lastUpdated">Updated: -</div>
+        </div>
+
+        <div style="margin-top:8px;">
+          <div id="chart_donut" style="height:260px"></div>
+        </div>
+
+        <div style="margin-top:12px" class="row-flex">
+          <div class="half">
+            <div class="big-rank" id="rankBox">Rank<br><span id="rankValue" style="font-size:36px">-</span></div>
+          </div>
+          <div class="half">
+            <div class="card small-box yesterday">
+              <div class="label-muted">Yesterday's Pharma</div>
+              <div class="small-value" id="yesterdayPharma">-</div>
+              <div class="label-muted" style="margin-top:8px">Yesterday's PL</div>
+              <div class="small-value" id="yesterdayPL">-</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- small footer -->
+    <div style="margin-top:16px; text-align:center; color:var(--muted); font-size:13px">
+      Built with ❤️ · Live update from Google Sheet
+    </div>
+  </div>
+
+<script>
+/* -----------------------
+  CONFIG - update only if needed
+------------------------*/
+const firebaseConfig = {
+  apiKey: "AIzaSyAtdeN84prygknfyF-aZ7d6Wr0m2LYSFek",
+  authDomain: "salesdashboard-8a33e.firebaseapp.com",
+  projectId: "salesdashboard-8a33e",
+  storageBucket: "salesdashboard-8a33e.firebasestorage.app",
+  messagingSenderId: "939228252310",
+  appId: "1:939228252310:web:c847ef8b0afc92e7495ab7"
+};
+
+// Your Apps Script API endpoint (already deployed)
+const API_BASE = "https://script.google.com/macros/s/AKfycbwHPdcB4MLaKu3VUDNfpkpiWEvnz3nRhwbbna0-5dn0dlO-ICf6913k8n9yMScc3fO8/exec";
+
+/* -----------------------
+  Initialization
+------------------------*/
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+
+const loginBtn = document.getElementById('loginBtn');
+const logoutBtn = document.getElementById('logoutBtn');
+const userInfo = document.getElementById('userInfo');
+const reportDate = document.getElementById('reportDate');
+const lastUpdated = document.getElementById('lastUpdated');
+
+reportDate.textContent = (new Date()).toLocaleDateString();
+
+/* login / logout */
+loginBtn.addEventListener('click', () => {
+  const provider = new firebase.auth.GoogleAuthProvider();
+  auth.signInWithPopup(provider).catch(err => console.error("Sign-in error:", err));
+});
+
+logoutBtn.addEventListener('click', () => {
+  auth.signOut().then(()=> location.reload());
+});
+
+/* on auth state change */
+auth.onAuthStateChanged(user => {
+  if (user) {
+    loginBtn.style.display = 'none';
+    logoutBtn.style.display = 'inline-block';
+    userInfo.textContent = `${user.displayName} • ${user.email}`;
+    loadSalesFor(user.email);
+  } else {
+    loginBtn.style.display = 'inline-block';
+    logoutBtn.style.display = 'none';
+    userInfo.textContent = 'Please login to view your sales';
+    clearDashboard();
+  }
+});
+
+/* -----------------------
+  Utilities
+------------------------*/
+function safeNum(v){
+  if (v === undefined || v === null || v === '') return 0;
+  if (typeof v === 'string') {
+    // remove commas and % signs
+    v = v.replace(/,/g,'').replace(/%/g,'').trim();
+  }
+  const n = Number(v);
+  return isNaN(n) ? 0 : n;
+}
+function fmtMoney(n){
+  const sign = n < 0 ? '-' : '';
+  return sign + new Intl.NumberFormat('en-IN').format(Math.abs(n));
+}
+function fmtPercentStr(v){
+  if (v === undefined || v === null || v === '') return "-";
+  if (typeof v === 'string' && v.indexOf('%')>-1) return v;
+  return (Number(v) || 0) + "%";
+}
+
+/* -----------------------
+  API & Data processing
+------------------------*/
+async function loadSalesFor(email){
+  try{
+    lastUpdated.textContent = "Updated: fetching...";
+    const url = API_BASE + '?email=' + encodeURIComponent(email);
+    const res = await fetch(url);
+    const arr = await res.json();
+
+    // arr is array of rows (objects). choose first if exists
+    if (!arr || arr.length===0) {
+      clearDashboard();
+      lastUpdated.textContent = "Updated: no data";
+      return;
+    }
+    const row = arr[0];
+
+    // parse numeric values
+    const targetPharma = safeNum(row.targetPharma);
+    const pharmaSales = safeNum(row.pharmaSales);
+    const pendingPharma = safeNum(row.pendingPharma);
+    const achievedPharmaPercent = row.achievedPharmaPercent || "";
+
+    const targetPL = safeNum(row.targetPL);
+    const plSales = safeNum(row.plSales);
+    const pendingPL = safeNum(row.pendingPL);
+    const achievedPLPercent = row.achievedPLPercent || "";
+
+    // write KPI cards
+    document.getElementById('targetPharma').textContent = fmtMoney(targetPharma);
+    document.getElementById('pharmaSales').textContent = fmtMoney(pharmaSales);
+    document.getElementById('pendingPharma').textContent = fmtMoney(pendingPharma);
+    document.getElementById('achievedPharmaPercent').textContent = achievedPharmaPercent;
+
+    document.getElementById('targetPL').textContent = fmtMoney(targetPL);
+    document.getElementById('plSales').textContent = fmtMoney(plSales);
+    document.getElementById('pendingPL').textContent = fmtMoney(pendingPL);
+    document.getElementById('achievedPLPercent').textContent = achievedPLPercent;
+
+    // run rates (simple example: current run rate = achievedPharma / days passed)
+    // If you want a specific formula, replace this block
+    const today = new Date();
+    const dayOfMonth = today.getDate();
+    const daysPassed = Math.max(1, dayOfMonth);
+    const currentRunRate = Math.round((pharmaSales + plSales) / daysPassed);
+    const requiredRunRate = Math.round(((targetPharma + targetPL) - (pharmaSales+plSales)) / Math.max(1, (30 - daysPassed)));
+
+    document.getElementById('currentRunRate').textContent = fmtMoney(currentRunRate);
+    document.getElementById('requiredRunRate').textContent = fmtMoney(requiredRunRate);
+
+    // Yesterday fields: try to grab yesterday values if returned by API (optional)
+    // If API doesn't return yesterday, we'll show dash
+    document.getElementById('yesterdayPharma').textContent = row.yesterdayPharma ? fmtMoney(safeNum(row.yesterdayPharma)) : '-';
+    document.getElementById('yesterdayPL').textContent = row.yesterdayPL ? fmtMoney(safeNum(row.yesterdayPL)) : '-';
+
+    // rank placeholder (if your API returns rank use it; else compute by %)
+    let rank = row.rank || '-';
+    if (rank === '-') {
+      // compute simple ranking by pharma achievement %
+      let pAch = Number( (achievedPharmaPercent+"").replace('%','') ) || 0;
+      rank = Math.round(100 - pAch); // dummy: lower is better
+    }
+    document.getElementById('rankValue').textContent = rank;
+
+    lastUpdated.textContent = "Updated: " + (new Date()).toLocaleTimeString();
+
+    // draw charts
+    drawBarChart(targetPharma, pharmaSales, targetPL, plSales);
+    drawDonutChart(pharmaSales, plSales, pendingPharma, pendingPL);
+
+  } catch(err){
+    console.error("Load error:", err);
+    lastUpdated.textContent = "Updated: error";
+  }
+}
+
+function clearDashboard(){
+  document.getElementById('targetPharma').textContent = '-';
+  document.getElementById('pharmaSales').textContent = '-';
+  document.getElementById('pendingPharma').textContent = '-';
+  document.getElementById('achievedPharmaPercent').textContent = '-';
+  document.getElementById('targetPL').textContent = '-';
+  document.getElementById('plSales').textContent = '-';
+  document.getElementById('pendingPL').textContent = '-';
+  document.getElementById('achievedPLPercent').textContent = '-';
+  document.getElementById('currentRunRate').textContent = '-';
+  document.getElementById('requiredRunRate').textContent = '-';
+  document.getElementById('yesterdayPharma').textContent = '-';
+  document.getElementById('yesterdayPL').textContent = '-';
+  document.getElementById('rankValue').textContent = '-';
+  // empty charts by redrawing with zeros
+  drawBarChart(0,0,0,0);
+  drawDonutChart(0,0,0,0);
+}
+
+/* -----------------------
+  Charts (Google Charts)
+------------------------*/
+google.charts.load('current', {'packages':['corechart','bar']});
+
+function drawBarChart(tPh, aPh, tPl, aPl){
+  // use numbers
+  const data = google.visualization.arrayToDataTable([
+    ['Category','Target','Achieved'],
+    ['Pharma', safeNum(tPh), safeNum(aPh)],
+    ['PL', safeNum(tPl), safeNum(aPl)]
+  ]);
+  const options = {
+    title: 'Target vs Achievement',
+    chartArea: {width:'70%'},
+    hAxis: {format: 'short'},
+    vAxis: {minValue:0},
+    colors: ['#f6c000','#16a34a']
+  };
+  const chart = new google.visualization.ColumnChart(document.getElementById('chart_bar'));
+  chart.draw(data, options);
+}
+
+function drawDonutChart(pharma, pl, pendingPharma, pendingPL){
+  // for donut/pie, negative values are invalid. convert negatives to 0 for charting.
+  const pPh = Math.max(0, safeNum(pharma));
+  const pPl = Math.max(0, safeNum(pl));
+  const pendPh = Math.max(0, safeNum(pendingPharma));
+  const pendPl = Math.max(0, safeNum(pendingPL));
+
+  const data = google.visualization.arrayToDataTable([
+    ['Category','Amount'],
+    ['Pharma Sales', pPh],
+    ['PL Sales', pPl],
+    ['Pending Pharma', pendPh],
+    ['Pending PL', pendPl]
+  ]);
+  const options = {
+    title: 'Pharma vs PL',
+    pieHole: 0.45,
+    chartArea: {left:10,top:20,width:'100%',height:'75%'},
+    colors: ['#3b82f6','#60a5fa','#f87171','#fb7185']
+  };
+  const chart = new google.visualization.PieChart(document.getElementById('chart_donut'));
+  chart.draw(data, options);
+}
+
+/* responsive redraw on resize */
+window.addEventListener('resize', () => {
+  // redraw using currently displayed values
+  // quick approach: re-fetch current numbers from DOM and redraw
+  const tPh = safeNum(document.getElementById('targetPharma').textContent.replace(/,/g,''));
+  const aPh = safeNum(document.getElementById('pharmaSales').textContent.replace(/,/g,''));
+  const tPl = safeNum(document.getElementById('targetPL').textContent.replace(/,/g,''));
+  const aPl = safeNum(document.getElementById('plSales').textContent.replace(/,/g,''));
+  drawBarChart(tPh, aPh, tPl, aPl);
+  drawDonutChart(aPh, aPl, safeNum(document.getElementById('pendingPharma').textContent.replace(/,/g,'')), safeNum(document.getElementById('pendingPL').textContent.replace(/,/g,'')));
+});
+
+</script>
+</body>
+</html>
