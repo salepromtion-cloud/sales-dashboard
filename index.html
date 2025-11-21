@@ -5,271 +5,217 @@
   <title>Sales Dashboard — Corporate Blue</title>
   <meta name="viewport" content="width=device-width,initial-scale=1" />
 
-  <!-- Firebase v8 -->
+  <!-- Firebase v8 (auth) -->
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
 
-  <!-- Google Charts -->
-  <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
-
   <style>
-    /* ---------- Theme: Corporate Blue (clean) ---------- */
     :root{
       --bg: #f3f6fb;
-      --panel: rgba(255,255,255,0.85);
-      --glass: rgba(255,255,255,0.55);
-      --soft: #e6eefc;
-      --primary: #0f3b82; /* deep blue */
+      --panel: rgba(255,255,255,0.95);
+      --primary: #0f3b82;
       --accent: #1ea3ff;
       --success: #16a34a;
       --muted: #6b7280;
-      --card-radius: 14px;
-      --shadow: 0 10px 30px rgba(16,24,40,0.08);
+      --card-radius: 12px;
+      --shadow: 0 8px 28px rgba(16,24,40,0.07);
       --glass-shadow: 0 6px 20px rgba(16,24,40,0.06);
-      --glass-border: rgba(255,255,255,0.6);
       font-family: Inter, "Segoe UI", Roboto, Arial, sans-serif;
     }
-    html,body{height:100%}
+    html,body{height:100%;margin:0}
     body{
       margin:0;
-      background: linear-gradient(180deg, #f7f9fc 0%, #eff6ff 100%);
-      color:#0b1320;
+      padding:20px;
+      background: linear-gradient(180deg,#f7f9fc 0%,#eef6ff 100%);
+      color:#07123a;
       -webkit-font-smoothing:antialiased;
       -moz-osx-font-smoothing:grayscale;
-      padding:20px;
     }
 
     .container{max-width:1200px;margin:0 auto}
 
     /* Header */
-    header{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:12px;
-      margin-bottom:20px;
-      position:sticky;
-      top:0;
-      background:transparent;
-      z-index:40;
-    }
-    .brand{
-      display:flex;
-      align-items:center;
-      gap:12px;
-    }
-    .brand img.logo{
-      height:44px; width:auto; border-radius:8px; box-shadow:var(--glass-shadow);
-    }
-    .brand .title{font-size:20px; color:var(--primary); font-weight:700}
-    .top-right {display:flex; gap:10px; align-items:center}
-    .profile-inline{display:flex; gap:8px; align-items:center; color:var(--muted)}
-    .profile-inline img{width:36px;height:36px;border-radius:999px;object-fit:cover;border:2px solid white;box-shadow:var(--glass-shadow)}
-    .top-actions button{border-radius:8px;padding:8px 12px;border:none;cursor:pointer}
-    .btn-primary{background:var(--primary); color:white; box-shadow: 0 6px 18px rgba(15,23,42,0.08)}
-    .btn-outline{background:transparent; color:var(--primary); border:1px solid rgba(15,59,130,0.12)}
+    header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px}
+    .brand{display:flex;align-items:center;gap:12px}
+    .brand img.logo{height:45px; border-radius:8px; object-fit:contain; box-shadow:var(--glass-shadow); background:white; padding:6px}
+    .brand .title{font-size:20px;color:var(--primary);font-weight:700}
+    .brand .subtitle{font-size:12px;color:var(--muted)}
+
+    .top-right{display:flex;align-items:center;gap:10px}
+    .btn{border-radius:8px;padding:8px 12px;border:none;cursor:pointer}
+    .btn-primary{background:var(--primary);color:white}
+    .btn-outline{background:white;border:1px solid rgba(15,59,130,0.12);color:var(--primary)}
 
     /* Grid */
-    .grid{display:grid;grid-template-columns: 2fr 1fr; gap:16px}
+    .grid{display:grid;grid-template-columns:2fr 1fr;gap:16px}
 
-    /* Cards */
-    .card{background:var(--panel); border-radius:var(--card-radius); padding:14px; box-shadow:var(--shadow); border:1px solid var(--glass-border); backdrop-filter: blur(6px);}
-    .section-title {font-weight:700;color:var(--primary);font-size:14px;margin-bottom:10px}
+    /* Card */
+    .card{background:var(--panel);border-radius:var(--card-radius);padding:14px;box-shadow:var(--shadow);border:1px solid rgba(255,255,255,0.6)}
+    .section-title{font-weight:700;color:var(--primary);font-size:14px;margin-bottom:10px}
 
-    /* KPI row */
+    /* KPI tiles */
     .kpi{display:flex;gap:12px;flex-wrap:wrap}
-    .kpi .tile{flex:1;min-width:140px;background:white;border-radius:10px;padding:12px;border:1px solid #eef3ff;box-shadow:var(--glass-shadow);text-align:center}
-    .kpi .tile h4{margin:0;font-size:12px;color:var(--muted)}
-    .kpi .tile p{margin:6px 0 0;font-size:18px;font-weight:700;color:#07123a}
+    .tile{flex:1;min-width:140px;background:white;border-radius:10px;padding:12px;border:1px solid #eef3ff;box-shadow:var(--glass-shadow);text-align:center}
+    .tile h4{margin:0;font-size:12px;color:var(--muted)}
+    .tile p{margin:6px 0 0;font-size:18px;font-weight:800;color:#07123a}
 
     /* Run rate small boxes */
     .row-flex{display:flex;gap:12px;flex-wrap:wrap}
     .half{flex:1;min-width:150px}
     .small-box{background:white;border-radius:10px;padding:12px;border:1px solid #eef3ff;box-shadow:var(--glass-shadow);text-align:center}
-    .tile-top{font-size:12px;color:var(--muted);margin-bottom:6px}
-    .small-value{font-weight:800;font-size:18px;color:#07123a}
+    .small-box .title{font-weight:800;font-size:13px;color:var(--primary)}
+    .small-box .subtitle{font-size:12px;color:var(--muted);margin-bottom:6px}
+    .small-box .value{font-weight:800;font-size:20px;color:#07123a}
 
-    /* Chart area */
-    #chart_bar {height:360px;border-radius:10px; background:linear-gradient(180deg,#ffffff,#fbfdff); padding:8px}
-    .gauges-row{display:flex; gap:12px; margin-top:14px; align-items:center}
-    .gauge-card{flex:1;background:linear-gradient(180deg,#ffffff,#fbfdff); border-radius:12px;padding:14px;border:1px solid #eef5ff; box-shadow:var(--glass-shadow); text-align:center}
+    /* Gauges row */
+    .gauges-row{display:flex;gap:12px;margin-top:14px;align-items:center}
+    .gauge-card{flex:1;background:linear-gradient(180deg,#ffffff,#fbfdff);border-radius:12px;padding:14px;border:1px solid #eef5ff;box-shadow:var(--glass-shadow);text-align:center}
 
-    /* Rank & trending (right column) */
-    .rank-box{background:linear-gradient(180deg,#1f3f7a,#17335e);color:white;padding:18px;border-radius:12px;text-align:center;box-shadow:0 10px 30px rgba(15,23,42,0.12)}
+    /* Right column */
+    .rank-box{background:linear-gradient(180deg,#1f3f7a,#17335e);color:white;padding:18px;border-radius:12px;text-align:center;box-shadow:0 10px 30px rgba(15,23,42,0.12);margin-bottom:12px}
     .trend-box{margin-top:12px;background:white;border-radius:10px;padding:12px;border:1px solid #eef3ff;box-shadow:var(--glass-shadow)}
 
-    /* badges & colors */
-    .badge {font-size:12px;padding:6px 8px;border-radius:8px;background:#eef9f0;color:#046c3f;font-weight:700}
     .muted-small{font-size:12px;color:var(--muted)}
 
-    /* responsive */
-    @media (max-width:980px){ .grid{grid-template-columns: 1fr} .gauges-row{flex-direction:column} }
+    @media (max-width:980px){ .grid{grid-template-columns:1fr} .gauges-row{flex-direction:column} .brand .title{font-size:18px} }
   </style>
 </head>
 <body>
   <div class="container">
     <header>
       <div class="brand">
-        <!-- logo from your repo (raw GitHub path / local path used here) -->
-        <img class="logo" src="/mnt/data/a8eec74a-e207-4b7d-9ebb-00a7dc978f2c.png" alt="Company Logo">
+        <!-- Using uploaded PNG logo (fast loading). Path resolved at deploy -->
+        <img class="logo" src="/mnt/data/Aushad Logo.png" alt="Company Logo">
         <div>
           <div class="title">Sales Performance Dashboard</div>
-          <div style="font-size:12px;color:var(--muted)">Live sales view — secure login</div>
+          <div class="subtitle">Live sales view — secure login</div>
         </div>
       </div>
 
       <div class="top-right">
-        <div id="userInfo" class="profile-inline">Please login</div>
-        <button id="loginBtn" class="btn-primary top-actions">Login with Google</button>
-        <button id="logoutBtn" class="btn-outline top-actions" style="display:none">Logout</button>
+        <div id="userInfo" style="display:flex;align-items:center;gap:8px;color:var(--muted)">Please login</div>
+        <button id="loginBtn" class="btn btn-primary">Login with Google</button>
+        <button id="logoutBtn" class="btn btn-outline" style="display:none">Logout</button>
       </div>
     </header>
 
     <main class="grid">
-      <!-- LEFT (main KPI + charts) -->
+      <!-- LEFT -->
       <div class="card">
-        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px">
-          <div>
-            <div class="section-title">Pharma Performance</div>
-            <div class="kpi" style="margin-bottom:12px">
-              <div class="tile">
-                <h4>Target Pharma</h4>
-                <p id="targetPharma">-</p>
-              </div>
-              <div class="tile">
-                <h4>Achieved Pharma</h4>
-                <p id="pharmaSales">-</p>
-              </div>
-              <div class="tile">
-                <h4>Pending Pharma</h4>
-                <p id="pendingPharma">-</p>
-              </div>
-              <div class="tile">
-                <h4>Pharma %</h4>
-                <p id="achievedPharmaPercent">-</p>
-              </div>
+
+        <div>
+          <div class="section-title">Pharma Performance</div>
+          <div class="kpi" style="margin-bottom:12px">
+            <div class="tile">
+              <h4>Target Pharma</h4>
+              <p id="targetPharma">-</p>
             </div>
-
-            <!-- Pharma Run Rate -->
-            <div class="section-title">Pharma Run Rate</div>
-            <div class="row-flex" style="margin-bottom:14px">
-              <div class="half small-box">
-                <div class="tile-top">Daily Pharma Average (CRR) / day</div>
-                <div class="label-muted">Daily Pharma Average (CRR)</div>
-                <div class="small-value" id="pharmaCRR">-</div>
-              </div>
-              <div class="half small-box">
-                <div class="tile-top">Daily Pharma Needed (RRR) / day</div>
-                <div class="label-muted">Daily Pharma Needed (RRR)</div>
-                <div class="small-value" id="pharmaRRR">-</div>
-              </div>
+            <div class="tile">
+              <h4>Achieved Pharma</h4>
+              <p id="pharmaSales">-</p>
             </div>
-
-            <!-- PL Performance -->
-            <div class="section-title">PL Performance</div>
-            <div class="kpi" style="margin-bottom:12px">
-              <div class="tile">
-                <h4>Target PL</h4>
-                <p id="targetPL">-</p>
-              </div>
-              <div class="tile">
-                <h4>Achieved PL</h4>
-                <p id="plSales">-</p>
-              </div>
-              <div class="tile">
-                <h4>Pending PL</h4>
-                <p id="pendingPL">-</p>
-              </div>
-              <div class="tile">
-                <h4>PL %</h4>
-                <p id="achievedPLPercent">-</p>
-              </div>
+            <div class="tile">
+              <h4>Pending Pharma</h4>
+              <p id="pendingPharma">-</p>
             </div>
-
-            <!-- PL Run Rate -->
-            <div class="section-title">PL Run Rate</div>
-            <div class="row-flex" style="margin-bottom:14px">
-              <div class="half small-box">
-                <div class="tile-top">Daily PL Average (CRR) / day</div>
-                <div class="label-muted">Daily PL Average (CRR)</div>
-                <div class="small-value" id="plCRR">-</div>
-              </div>
-              <div class="half small-box">
-                <div class="tile-top">Daily PL Needed (RRR) / day</div>
-                <div class="label-muted">Daily PL Needed (RRR)</div>
-                <div class="small-value" id="plRRR">-</div>
-              </div>
+            <div class="tile">
+              <h4>Pharma %</h4>
+              <p id="achievedPharmaPercent">-</p>
             </div>
-
-            <!-- Gauges (side-by-side) -->
-            <div class="gauges-row">
-              <div class="gauge-card card" id="gauge_pharma_card">
-                <div class="muted-small">Pharma — Projection vs Target</div>
-                <div id="gaugePharma" style="height:160px;"></div>
-                <div style="margin-top:8px;font-weight:700" id="gaugePharmaValue">-</div>
-                <div class="muted-small" id="gaugePharmaPercent">-</div>
-              </div>
-
-              <div class="gauge-card card" id="gauge_pl_card">
-                <div class="muted-small">PL — Projection vs Target</div>
-                <div id="gaugePL" style="height:160px;"></div>
-                <div style="margin-top:8px;font-weight:700" id="gaugePLValue">-</div>
-                <div class="muted-small" id="gaugePLPercent">-</div>
-              </div>
-            </div>
-
-            <!-- Target vs Achievement Chart -->
-            <div class="section-title" style="margin-top:14px">Target vs Achievement</div>
-            <div id="chart_bar"></div>
           </div>
+
+          <div class="section-title">Pharma Run Rate</div>
+          <div class="row-flex" style="margin-bottom:14px">
+            <div class="half small-box">
+              <div class="title">Daily Pharma Average (CRR)</div>
+              <div class="subtitle">(CRR) / day</div>
+              <div class="value" id="pharmaCRR">-</div>
+            </div>
+            <div class="half small-box">
+              <div class="title">Daily Pharma Needed (RRR)</div>
+              <div class="subtitle">(RRR) / day</div>
+              <div class="value" id="pharmaRRR">-</div>
+            </div>
+          </div>
+
+          <div class="section-title">PL Performance</div>
+          <div class="kpi" style="margin-bottom:12px">
+            <div class="tile">
+              <h4>Target PL</h4>
+              <p id="targetPL">-</p>
+            </div>
+            <div class="tile">
+              <h4>Achieved PL</h4>
+              <p id="plSales">-</p>
+            </div>
+            <div class="tile">
+              <h4>Pending PL</h4>
+              <p id="pendingPL">-</p>
+            </div>
+            <div class="tile">
+              <h4>PL %</h4>
+              <p id="achievedPLPercent">-</p>
+            </div>
+          </div>
+
+          <div class="section-title">PL Run Rate</div>
+          <div class="row-flex" style="margin-bottom:14px">
+            <div class="half small-box">
+              <div class="title">Daily PL Average (CRR)</div>
+              <div class="subtitle">(CRR) / day</div>
+              <div class="value" id="plCRR">-</div>
+            </div>
+            <div class="half small-box">
+              <div class="title">Daily PL Needed (RRR)</div>
+              <div class="subtitle">(RRR) / day</div>
+              <div class="value" id="plRRR">-</div>
+            </div>
+          </div>
+
+          <!-- Gauges row (side-by-side) -->
+          <div class="gauges-row">
+            <div class="gauge-card card">
+              <div class="muted-small">Pharma — Target vs Achieved</div>
+              <div id="gaugePharma" style="height:170px;margin-top:8px"></div>
+              <div id="gaugePharmaValue" style="margin-top:10px;font-weight:800;font-size:18px">-</div>
+              <div id="gaugePharmaPct" class="muted-small">-</div>
+            </div>
+
+            <div class="gauge-card card">
+              <div class="muted-small">PL — Target vs Achieved</div>
+              <div id="gaugePL" style="height:170px;margin-top:8px"></div>
+              <div id="gaugePLValue" style="margin-top:10px;font-weight:800;font-size:18px">-</div>
+              <div id="gaugePLPct" class="muted-small">-</div>
+            </div>
+          </div>
+
         </div>
       </div>
 
-      <!-- RIGHT column: Rank & Trending -->
+      <!-- RIGHT -->
       <div class="card">
-        <div class="section-title">Rank & Trending</div>
+        <div class="section-title">Rank</div>
+        <div class="rank-box">
+          <div style="font-size:13px;opacity:0.95">Your Rank</div>
+          <div id="rankValue" style="font-size:34px;font-weight:800;margin-top:6px">-</div>
+          <div style="font-size:12px;margin-top:6px;opacity:0.9">based on (Pharma % + PL %)</div>
+        </div>
 
-        <div style="margin-bottom:12px">
-          <div class="rank-box">
-            <div style="font-size:13px;opacity:0.95">Your Rank</div>
-            <div id="rankValue" style="font-size:34px;font-weight:800;margin-top:6px">-</div>
-            <div style="font-size:12px;margin-top:6px;opacity:0.9">based on (Pharma % + PL %)</div>
+        <div class="trend-box">
+          <div style="font-weight:700;color:var(--primary)">Pharma Projection</div>
+          <div style="display:flex;justify-content:space-between;margin-top:10px">
+            <div><div class="muted-small">CRR</div><div id="trend_pharma_crr" style="font-weight:700">-</div></div>
+            <div><div class="muted-small">Projected</div><div id="trend_pharma_projected" style="font-weight:700">-</div></div>
+            <div><div class="muted-small">Gap</div><div id="trend_pharma_gap" style="font-weight:700">-</div></div>
           </div>
         </div>
 
         <div class="trend-box">
-          <div class="trend-title">Pharma Trending (Projection)</div>
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px">
-            <div>
-              <div class="muted-small">CRR</div>
-              <div class="trend-value" id="trend_pharma_crr">-</div>
-            </div>
-            <div>
-              <div class="muted-small">Projected</div>
-              <div class="trend-value" id="trend_pharma_projected">-</div>
-            </div>
-            <div>
-              <div class="muted-small">Gap</div>
-              <div class="trend-value" id="trend_pharma_gap">-</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="trend-box">
-          <div class="trend-title">PL Trending (Projection)</div>
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px">
-            <div>
-              <div class="muted-small">CRR</div>
-              <div class="trend-value" id="trend_pl_crr">-</div>
-            </div>
-            <div>
-              <div class="muted-small">Projected</div>
-              <div class="trend-value" id="trend_pl_projected">-</div>
-            </div>
-            <div>
-              <div class="muted-small">Gap</div>
-              <div class="trend-value" id="trend_pl_gap">-</div>
-            </div>
+          <div style="font-weight:700;color:var(--primary)">PL Projection</div>
+          <div style="display:flex;justify-content:space-between;margin-top:10px">
+            <div><div class="muted-small">CRR</div><div id="trend_pl_crr" style="font-weight:700">-</div></div>
+            <div><div class="muted-small">Projected</div><div id="trend_pl_projected" style="font-weight:700">-</div></div>
+            <div><div class="muted-small">Gap</div><div id="trend_pl_gap" style="font-weight:700">-</div></div>
           </div>
         </div>
 
@@ -278,7 +224,7 @@
   </div>
 
   <script>
-    /* ---------------- Firebase config (existing project) ---------------- */
+    /* ---------------- Firebase config ---------------- */
     const firebaseConfig = {
       apiKey: "AIzaSyAtdeN84prygknfyF-aZ7d6Wr0m2LYSFek",
       authDomain: "salesdashboard-8a33e.firebaseapp.com",
@@ -290,405 +236,220 @@
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
 
-    /* Utility formatting */
-    function safeNum(v){
-      if (v === undefined || v === null || v === "") return 0;
-      v = (v+"").replace(/,/g,"").trim();
-      return Number(v) || 0;
-    }
-    function fmtMoney(n){
-      return new Intl.NumberFormat("en-IN").format(Math.round(n));
-    }
-    function fmtPercentValue(x){
-      const num = Number(String(x).replace(/,/g,"")) || 0;
-      if (num > 0 && num <= 1) return Math.round(num * 100) + "%";
-      return Math.round(num) + "%";
-    }
+    /* ---------------- Helpers ---------------- */
+    function safeNum(v){ if(v===undefined||v===null||v==="") return 0; v=(v+"").replace(/,/g,"").trim(); return Number(v)||0; }
+    function fmtMoney(n){ return new Intl.NumberFormat("en-IN").format(Math.round(n)); }
+    function fmtPct(n){ if(isNaN(n)) return "0%"; return Math.round(n) + "%"; }
 
     /* Working days helpers */
     function countWorkingDaysTillToday() {
-      const today = new Date();
-      const year = today.getFullYear();
-      const month = today.getMonth();
-      const day = today.getDate();
-      let workingDays = 0;
-      for (let d = 1; d <= day; d++) {
-        const dt = new Date(year, month, d);
-        if (dt.getDay() !== 0) workingDays++;
-      }
-      return Math.max(1, workingDays);
+      const today = new Date(); const y=today.getFullYear(), m=today.getMonth(), d=today.getDate();
+      let wd=0; for(let i=1;i<=d;i++){ const dt=new Date(y,m,i); if(dt.getDay()!==0) wd++; } return Math.max(1,wd);
     }
     function countRemainingWorkingDays() {
-      const today = new Date();
-      const year = today.getFullYear();
-      const month = today.getMonth();
-      const lastDay = new Date(year, month+1, 0).getDate();
-      let rem = 0;
-      for (let d = today.getDate()+1; d <= lastDay; d++) {
-        const dt = new Date(year, month, d);
-        if (dt.getDay() !== 0) rem++;
-      }
-      return rem;
+      const today=new Date(); const y=today.getFullYear(), m=today.getMonth(), last=new Date(y,m+1,0).getDate();
+      let rem=0; for(let i=today.getDate()+1;i<=last;i++){ const dt=new Date(y,m,i); if(dt.getDay()!==0) rem++; } return rem;
     }
     function countWorkingDaysTotal() {
-      const today = new Date();
-      const year = today.getFullYear();
-      const month = today.getMonth();
-      const lastDay = new Date(year, month+1, 0).getDate();
-      let total = 0;
-      for (let d = 1; d <= lastDay; d++) {
-        const dt = new Date(year, month, d);
-        if (dt.getDay() !== 0) total++;
-      }
-      return Math.max(1, total);
+      const today=new Date(); const y=today.getFullYear(), m=today.getMonth(), last=new Date(y,m+1,0).getDate();
+      let total=0; for(let i=1;i<=last;i++){ const dt=new Date(y,m,i); if(dt.getDay()!==0) total++; } return Math.max(1,total);
     }
 
-    /* Run Rate & Trending (combined) */
-    function updateRunRatesAndTrending(tPh,aPh,tPl,aPl){
-      const W_passed = countWorkingDaysTillToday();
-      const W_remaining = countRemainingWorkingDays();
-      const W_total = countWorkingDaysTotal();
-
-      // Pharma
-      const pharmaCRR = Math.round(aPh / Math.max(1, W_passed));
-      const pharmaGap = Math.max(0, tPh - aPh);
-      const pharmaRRR = W_remaining > 0 ? Math.ceil(pharmaGap / Math.max(1, W_remaining)) : pharmaGap;
-      const pharmaProjected = Math.round(pharmaCRR * W_total);
-      const pharmaProjectedGap = Math.max(0, tPh - pharmaProjected);
-
-      // PL
-      const plCRR = Math.round(aPl / Math.max(1, W_passed));
-      const plGap = Math.max(0, tPl - aPl);
-      const plRRR = W_remaining > 0 ? Math.ceil(plGap / Math.max(1, W_remaining)) : plGap;
-      const plProjected = Math.round(plCRR * W_total);
-      const plProjectedGap = Math.max(0, tPl - plProjected);
-
-      // Write DOM
-      document.getElementById("pharmaCRR").textContent = pharmaCRR === 0 ? "-" : fmtMoney(pharmaCRR);
-      document.getElementById("pharmaRRR").textContent = fmtMoney(pharmaRRR);
-      document.getElementById("plCRR").textContent = plCRR === 0 ? "-" : fmtMoney(plCRR);
-      document.getElementById("plRRR").textContent = fmtMoney(plRRR);
-
-      document.getElementById("trend_pharma_crr").textContent = pharmaCRR===0? "-" : fmtMoney(pharmaCRR);
-      document.getElementById("trend_pharma_projected").textContent = fmtMoney(pharmaProjected);
-      document.getElementById("trend_pharma_gap").textContent = fmtMoney(pharmaProjectedGap);
-
-      document.getElementById("trend_pl_crr").textContent = plCRR===0? "-" : fmtMoney(plCRR);
-      document.getElementById("trend_pl_projected").textContent = fmtMoney(plProjected);
-      document.getElementById("trend_pl_gap").textContent = fmtMoney(plProjectedGap);
-
-      // Update gauges & percent labels
-      updateGauge("gaugePharma", aPh, tPh, "gaugePharmaValue", "gaugePharmaPercent");
-      updateGauge("gaugePL", aPl, tPl, "gaugePLValue", "gaugePLPercent");
-    }
-
-    /* Google Charts */
-    google.charts.load("current",{packages:["corechart","bar"]});
-
-    /* Your Apps Script API */
-    const API_URL = "https://script.google.com/macros/s/AKfycbwHPdcB4MLaKu3VUDNfpkpiWEvnz3nRhwbbna0-5dn0dlO-ICf6913k8n9yMScc3fO8/exec";
-
-    /* Auth state handling */
-    auth.onAuthStateChanged(user=>{
-      if(user){
-        document.getElementById("loginBtn").style.display="none";
-        document.getElementById("logoutBtn").style.display="inline-block";
-        // show email temporarily, will replace with salesmanName from sheet if present
-        document.getElementById("userInfo").innerHTML = `<img src="${user.photoURL||''}" style="border-radius:999px;width:36px;height:36px;object-fit:cover;margin-right:8px"> ${user.email}`;
-        loadSalesAndAll(user.email);
-      } else {
-        document.getElementById("loginBtn").style.display="inline-block";
-        document.getElementById("logoutBtn").style.display="none";
-        document.getElementById("userInfo").textContent = "Please login";
-        clearUI();
-      }
-    });
-
-    document.getElementById("loginBtn").onclick = () => {
-      const provider = new firebase.auth.GoogleAuthProvider();
-      auth.signInWithPopup(provider).catch(e => console.error("Login error", e));
-    };
-    document.getElementById("logoutBtn").onclick = () => auth.signOut();
-
-    function clearUI(){
-      const ids = ["targetPharma","pharmaSales","pendingPharma","achievedPharmaPercent","targetPL","plSales","pendingPL","achievedPLPercent",
-                   "pharmaCRR","pharmaRRR","plCRR","plRRR",
-                   "trend_pharma_crr","trend_pharma_projected","trend_pharma_gap",
-                   "trend_pl_crr","trend_pl_projected","trend_pl_gap","rankValue",
-                   "gaugePharmaValue","gaugePharmaPercent","gaugePLValue","gaugePLPercent"];
-      ids.forEach(id => { const el = document.getElementById(id); if (el) el.textContent = "-"; });
-      const chart = document.getElementById("chart_bar"); if (chart) chart.innerHTML = "";
-      const gA = document.getElementById("gaugePharma"); if (gA) gA.innerHTML = "";
-      const gB = document.getElementById("gaugePL"); if (gB) gB.innerHTML = "";
-    }
-
-    /* Load single row & compute rank */
-    async function loadSalesAndAll(email){
-      try {
-        const res = await fetch(API_URL + "?email=" + encodeURIComponent(email));
-        const data = await res.json();
-        if(!data || !data.length){
-          alert("No sales data found for this email in Google Sheet.");
-          clearUI();
-          return;
-        }
-        const row = data[0];
-
-        const targetPharma = safeNum(row.targetPharma);
-        const pharmaSales = safeNum(row.pharmaSales);
-        const pendingPharma = safeNum(row.pendingPharma);
-        const targetPL = safeNum(row.targetPL);
-        const plSales = safeNum(row.plSales);
-        const pendingPL = safeNum(row.pendingPL);
-
-        // show salesman name if present
-        const nameToShow = (row.salesmanName && row.salesmanName.trim()) ? row.salesmanName.trim() : firebase.auth().currentUser.email;
-        const photo = firebase.auth().currentUser.photoURL || "";
-        document.getElementById("userInfo").innerHTML = `<img src="${photo}" style="border-radius:999px;width:36px;height:36px;object-fit:cover;margin-right:8px"> ${nameToShow}`;
-
-        // write KPIs
-        document.getElementById("targetPharma").textContent = fmtMoney(targetPharma);
-        document.getElementById("pharmaSales").textContent = fmtMoney(pharmaSales);
-        document.getElementById("pendingPharma").textContent = fmtMoney(pendingPharma);
-        document.getElementById("achievedPharmaPercent").textContent = fmtPercentValue(row.achievedPharmaPercent);
-
-        document.getElementById("targetPL").textContent = fmtMoney(targetPL);
-        document.getElementById("plSales").textContent = fmtMoney(plSales);
-        document.getElementById("pendingPL").textContent = fmtMoney(pendingPL);
-        document.getElementById("achievedPLPercent").textContent = fmtPercentValue(row.achievedPLPercent);
-
-        // run rate & trending
-        updateRunRatesAndTrending(targetPharma, pharmaSales, targetPL, plSales);
-
-        // draw chart
-        drawBarChart(targetPharma, pharmaSales, targetPL, plSales);
-
-        // compute rank (from all rows) - API must support ?all=true
-        computeRank(email);
-
-      } catch (err) {
-        console.error("Load error", err);
-      }
-    }
-
-    /* Rank: fetch all rows */
-    async function computeRank(currentEmail){
-      try {
-        const resAll = await fetch(API_URL + "?all=true");
-        const all = await resAll.json();
-        if(!all || !all.length){ document.getElementById("rankValue").textContent = "-"; return; }
-
-        const scores = all.map(r=>{
-          const p = Number(String(r.achievedPharmaPercent).replace(/,/g,"")) || 0;
-          const l = Number(String(r.achievedPLPercent).replace(/,/g,"")) || 0;
-          const pNorm = (p > 0 && p <= 1) ? p*100 : p;
-          const lNorm = (l > 0 && l <= 1) ? l*100 : l;
-          return { email: (r.email||"").toLowerCase().trim(), total: pNorm + lNorm };
-        });
-
-        scores.sort((a,b)=>b.total - a.total);
-        const idx = scores.findIndex(s => s.email === (currentEmail||"").toLowerCase().trim());
-        document.getElementById("rankValue").textContent = idx === -1 ? "-" : (idx+1);
-      } catch(e){
-        console.error("Rank calc error", e);
-        document.getElementById("rankValue").textContent = "-";
-      }
-    }
-
-    /* drawBarChart: Achieved vertical bars + Target horizontal line with markers (ComboChart) */
-    function drawBarChart(tPh, aPh, tPl, aPl) {
-      const data = google.visualization.arrayToDataTable([
-        ["Category", "Achieved", "Target"],
-        ["Pharma", aPh, tPh],
-        ["PL", aPl, tPl]
-      ]);
-
-      const options = {
-        chartArea: { width: "68%", height: "75%" },
-        seriesType: "bars",
-        series: {
-          1: {
-            type: "line",
-            color: "#f6c000",
-            lineWidth: 3,
-            pointSize: 7
-          }
-        },
-        colors: ["#16a34a", "#f6c000"],
-        vAxis: { minValue: 0, format: 'short' },
-        legend: { position: 'right' }
-      };
-
-      const chart = new google.visualization.ComboChart(document.getElementById("chart_bar"));
-      chart.draw(data, options);
-    }
-
-    /* ----------------- Modern Arc Gauges (SVG) -----------------
-       Gauge behavior:
-       - Scale: 0 .. Target
-       - If achieved > target -> gauge shows full and label "Over Achieved", color green
-       - Otherwise gauge shows percent fill
-    ------------------------------------------------------------*/
-    function createArcSVG(containerId){
+    /* ---------------- SVG Semicircle Gauges ----------------
+       Formula: percent = Achieved / Target * 100 (C1)
+       Display: Value (big) and % (small) below
+    ----------------------------------------------------------*/
+    function createGauge(containerId){
       const container = document.getElementById(containerId);
-      if(!container) return null;
+      if(!container) return;
       container.innerHTML = '';
       const svgNS = "http://www.w3.org/2000/svg";
       const svg = document.createElementNS(svgNS,"svg");
       svg.setAttribute("viewBox","0 0 300 160");
       svg.setAttribute("width","100%");
       svg.setAttribute("height","100%");
-      // background arc path elements
       const g = document.createElementNS(svgNS,"g");
-      g.setAttribute("transform","translate(150,130)");
+      g.setAttribute("transform","translate(150,140)");
       svg.appendChild(g);
 
-      // base arc (light)
+      // base arc
       const base = document.createElementNS(svgNS,"path");
-      base.setAttribute("d", describeArc(0,0,100,180,0)); // semi circle
+      base.setAttribute("d", arcPath(0,0,100,180,0));
       base.setAttribute("fill","none");
       base.setAttribute("stroke","#eef6ff");
       base.setAttribute("stroke-width","20");
       base.setAttribute("stroke-linecap","round");
       g.appendChild(base);
 
-      // progress arc
-      const prog = document.createElementNS(svgNS,"path");
-      prog.setAttribute("d", describeArc(0,0,100,180,180)); // start with zero length
-      prog.setAttribute("fill","none");
-      prog.setAttribute("stroke","#16a34a");
-      prog.setAttribute("stroke-width","20");
-      prog.setAttribute("stroke-linecap","round");
-      prog.setAttribute("id","progArc_"+containerId);
-      g.appendChild(prog);
+      // achieved arc (initially zero)
+      const ach = document.createElementNS(svgNS,"path");
+      ach.setAttribute("d", arcPath(0,0,100,180,180));
+      ach.setAttribute("fill","none");
+      ach.setAttribute("stroke","#1ea3ff");
+      ach.setAttribute("stroke-width","20");
+      ach.setAttribute("stroke-linecap","round");
+      ach.setAttribute("id","ach_"+containerId);
+      g.appendChild(ach);
 
-      // marker (needle)
-      const needle = document.createElementNS(svgNS,"line");
-      needle.setAttribute("id","needle_"+containerId);
-      needle.setAttribute("x1","0");
-      needle.setAttribute("y1","0");
-      needle.setAttribute("x2","0");
-      needle.setAttribute("y2","-90");
-      needle.setAttribute("stroke","#1f2937");
-      needle.setAttribute("stroke-width","3");
-      needle.setAttribute("stroke-linecap","round");
-      g.appendChild(needle);
+      // center dot
+      const center = document.createElementNS(svgNS,"circle");
+      center.setAttribute("r","6"); center.setAttribute("cx","0"); center.setAttribute("cy","0"); center.setAttribute("fill","#07123a");
+      g.appendChild(center);
 
       container.appendChild(svg);
-      return {svg,prog,needle};
     }
-
-    // describeArc helper (from polar to SVG path)
-    function polarToCartesian(centerX, centerY, radius, angleInDegrees) {
-      const angleInRadians = (angleInDegrees-90) * Math.PI / 180.0;
-      return {
-        x: centerX + (radius * Math.cos(angleInRadians)),
-        y: centerY + (radius * Math.sin(angleInRadians))
-      };
+    function polarToCartesian(cx,cy,r,angleDeg){
+      const angleRad = (angleDeg-90) * Math.PI / 180.0;
+      return { x: cx + r * Math.cos(angleRad), y: cy + r * Math.sin(angleRad) };
     }
-    function describeArc(x, y, radius, startAngle, endAngle){
-      const start = polarToCartesian(x,y,radius,endAngle);
-      const end = polarToCartesian(x,y,radius,startAngle);
-      const largeArcFlag = endAngle - startAngle <= 180 ? "0" : "1";
-      const d = [
-        "M", start.x, start.y,
-        "A", radius, radius, 0, largeArcFlag, 0, end.x, end.y
-      ].join(" ");
-      return d;
+    function arcPath(cx,cy,r,startAngle,endAngle){
+      const start = polarToCartesian(cx,cy,r,endAngle);
+      const end = polarToCartesian(cx,cy,r,startAngle);
+      const largeArcFlag = (endAngle - startAngle) <= 180 ? "0" : "1";
+      return ["M", start.x, start.y, "A", r, r, 0, largeArcFlag, 0, end.x, end.y].join(" ");
     }
-
-    // animate arc progress and needle (containerId: 'gaugePharma'|'gaugePL')
-    function updateGauge(containerId, achieved, target, valueElementId, percentElementId){
-      const c = document.getElementById(containerId);
-      if(!c) return;
-      // ensure svg exists
-      const exists = c.querySelector('svg');
-      if(!exists) createArcSVG(containerId);
-
-      const prog = document.getElementById('progArc_'+containerId);
-      const needle = document.getElementById('needle_'+containerId);
-
+    function updateGauge(containerId, achieved, target, valueElId, pctElId){
+      const achArc = document.getElementById('ach_'+containerId);
+      if(!achArc) return;
       const max = Math.max(1, target);
-      // percent (0..1)
-      const rawPercent = target === 0 ? 0 : Math.min(1, achieved / max);
-      const percentForDisplay = target === 0 ? 0 : Math.min(100, Math.round((achieved / max) * 100));
-      const overachieved = achieved > target;
+      const pct = target === 0 ? 0 : Math.min(1, achieved / max);
+      const displayPct = Math.round((target === 0 ? 0 : (achieved / max) * 100));
+      const over = achieved > target;
 
-      // final angle: map 0..1 to 180..0 degrees (left to right)
-      const startAngle = 180;
-      const endAngle = 0;
-      const toAngle = startAngle - (startAngle - endAngle) * rawPercent; // 180 -> 0
+      const start = 180, end = 0;
+      const toAngle = start - (start - end) * pct;
+      const newD = arcPath(0,0,100,180,toAngle);
+      achArc.setAttribute('d', newD);
+      achArc.setAttribute('stroke', over ? '#16a34a' : '#1ea3ff');
 
-      // animate path by computing a short arc from 180 to toAngle
-      const radius = 100;
-      const newD = describeArc(0,0,radius,180,toAngle);
-      // animate stroke color if overachieved
-      const strokeColor = overachieved ? "#16a34a" : "#1ea3ff";
-
-      // Animate with requestAnimationFrame
-      let frame = 0, frames = 36;
-      const oldD = prog.getAttribute('d') || describeArc(0,0,radius,180,180);
-      const startTime = performance.now();
-
-      // We'll do simple tween by updating angle from current to target
-      // Extract current end angle by parsing old path is complex; we approximate by animating needle rotation and arc tween toAngle
-      const initialAngle = (() => {
-        // try to compute by reverse: find current percent from prog length (approx)
-        return 180; // start from left if unknown
-      })();
-
-      const animate = () => {
-        frame++;
-        const t = Math.min(1, frame/frames);
-        const ease = t*(2-t);
-        const curAngle = initialAngle + (toAngle - initialAngle) * ease;
-        const curD = describeArc(0,0,radius,180,curAngle);
-        prog.setAttribute('d', curD);
-        prog.setAttribute('stroke', strokeColor);
-
-        // needle rotate: needle originally points straight up (-90 deg); we rotate group instead by setting transform on needle
-        // needle angle (degrees) relative: map curAngle (180..0) to -90..+90 for needle tip
-        const needleAngle = (curAngle - 90); // map roughly
-        needle.setAttribute('transform','rotate(' + (needleAngle) + ')');
-
-        if(frame < frames) requestAnimationFrame(animate);
-        else {
-          // final text updates
-          const valueEl = document.getElementById(valueElementId);
-          const pctEl = document.getElementById(percentElementId);
-          if(valueEl) valueEl.textContent = fmtMoney(achieved) + (overachieved ? " ✓ Over Achieved" : "");
-          if(pctEl) pctEl.textContent = (target === 0 ? "0%" : (percentForDisplay + "%"));
-          // color fill if overachieved
-          if(overachieved){
-            prog.setAttribute('stroke', '#16a34a');
-          }
-        }
-      };
-      frame = 0;
-      requestAnimationFrame(animate);
+      // text update
+      const v = document.getElementById(valueElId);
+      const p = document.getElementById(pctElId);
+      if(v) v.textContent = fmtMoney(achieved) + (over ? " ✓ Over Achieved" : "");
+      if(p) p.textContent = (target === 0 ? "0%" : displayPct + "%");
     }
 
-    /* window resize redraw */
-    window.addEventListener('resize', () => {
-      try {
-        const tPh = safeNum(document.getElementById("targetPharma").textContent);
-        const aPh = safeNum(document.getElementById("pharmaSales").textContent);
-        const tPl = safeNum(document.getElementById("targetPL").textContent);
-        const aPl = safeNum(document.getElementById("plSales").textContent);
-        drawBarChart(tPh, aPh, tPl, aPl);
-      } catch(e){}
+    /* Create gauges initially */
+    createGauge('gaugePharma');
+    createGauge('gaugePL');
+
+    /* ---------------- Apps Script API ---------------- */
+    const API_URL = "https://script.google.com/macros/s/AKfycbwHPdcB4MLaKu3VUDNfpkpiWEvnz3nRhwbbna0-5dn0dlO-ICf6913k8n9yMScc3fO8/exec";
+
+    /* Auth handling */
+    auth.onAuthStateChanged(user=>{
+      if(user){
+        document.getElementById("loginBtn").style.display="none";
+        document.getElementById("logoutBtn").style.display="inline-block";
+        const photo = user.photoURL || "";
+        document.getElementById("userInfo").innerHTML = (photo? `<img src='${photo}' style='width:34px;height:34px;border-radius:999px;margin-right:8px;object-fit:cover'>` : "") + (user.displayName || user.email);
+        loadDataForUser(user.email);
+      } else {
+        document.getElementById("loginBtn").style.display="inline-block";
+        document.getElementById("logoutBtn").style.display="none";
+        document.getElementById("userInfo").textContent = "Please login";
+        // clear content if needed
+      }
     });
 
-    /* On load, create empty gauges */
-    createArcSVG('gaugePharma');
-    createArcSVG('gaugePL');
+    document.getElementById("loginBtn").onclick = () => {
+      const provider = new firebase.auth.GoogleAuthProvider();
+      auth.signInWithPopup(provider).catch(e=>console.error(e));
+    };
+    document.getElementById("logoutBtn").onclick = () => auth.signOut();
 
-    /* If you need to force-deploy or test without Netlify caching, use this function */
-    function refreshFromGit() {
-      // Helper for you if needed
-      location.reload(true);
+    /* Load single row for user and update UI */
+    async function loadDataForUser(email){
+      try {
+        const res = await fetch(API_URL + "?email=" + encodeURIComponent(email));
+        const data = await res.json();
+        if(!data || !data.length){ alert("No sales data found for this email in the Sheet."); return; }
+        const row = data[0];
+
+        const tPh = safeNum(row.targetPharma);
+        const aPh = safeNum(row.pharmaSales);
+        const pPh = safeNum(row.pendingPharma);
+        const tPl = safeNum(row.targetPL);
+        const aPl = safeNum(row.plSales);
+        const pPl = safeNum(row.pendingPL);
+
+        // KPIs
+        document.getElementById("targetPharma").textContent = fmtMoney(tPh);
+        document.getElementById("pharmaSales").textContent = fmtMoney(aPh);
+        document.getElementById("pendingPharma").textContent = fmtMoney(pPh);
+        const phPct = Number(String(row.achievedPharmaPercent).replace(/,/g,''))||0;
+        document.getElementById("achievedPharmaPercent").textContent = (phPct>0 && phPct<=1)? Math.round(phPct*100)+"%": Math.round(phPct)+"%";
+
+        document.getElementById("targetPL").textContent = fmtMoney(tPl);
+        document.getElementById("plSales").textContent = fmtMoney(aPl);
+        document.getElementById("pendingPL").textContent = fmtMoney(pPl);
+        const plPct = Number(String(row.achievedPLPercent).replace(/,/g,''))||0;
+        document.getElementById("achievedPLPercent").textContent = (plPct>0 && plPct<=1)? Math.round(plPct*100)+"%": Math.round(plPct)+"%";
+
+        // run rates
+        const Wpassed = countWorkingDaysTillToday();
+        const Wrem = countRemainingWorkingDays();
+        const Wtotal = countWorkingDaysTotal();
+        const pharmaCRR = Math.round(aPh / Math.max(1,Wpassed));
+        const pharmaRRR = Wrem>0 ? Math.ceil(Math.max(0,tPh - aPh)/Wrem) : Math.max(0,tPh - aPh);
+        document.getElementById("pharmaCRR").textContent = pharmaCRR===0? "-" : fmtMoney(pharmaCRR);
+        document.getElementById("pharmaRRR").textContent = fmtMoney(pharmaRRR);
+
+        const plCRR = Math.round(aPl / Math.max(1,Wpassed));
+        const plRRR = Wrem>0 ? Math.ceil(Math.max(0,tPl - aPl)/Wrem) : Math.max(0,tPl - aPl);
+        document.getElementById("plCRR").textContent = plCRR===0? "-" : fmtMoney(plCRR);
+        document.getElementById("plRRR").textContent = fmtMoney(plRRR);
+
+        // projections
+        const pharmaProjected = Math.round(pharmaCRR * Wtotal);
+        const pharmaProjectedGap = Math.max(0, tPh - pharmaProjected);
+        document.getElementById("trend_pharma_crr").textContent = pharmaCRR===0? "-" : fmtMoney(pharmaCRR);
+        document.getElementById("trend_pharma_projected").textContent = fmtMoney(pharmaProjected);
+        document.getElementById("trend_pharma_gap").textContent = fmtMoney(pharmaProjectedGap);
+
+        const plProjected = Math.round(plCRR * Wtotal);
+        const plProjectedGap = Math.max(0, tPl - plProjected);
+        document.getElementById("trend_pl_crr").textContent = plCRR===0? "-" : fmtMoney(plCRR);
+        document.getElementById("trend_pl_projected").textContent = fmtMoney(plProjected);
+        document.getElementById("trend_pl_gap").textContent = fmtMoney(plProjectedGap);
+
+        // update gauges using Achieved / Target * 100
+        updateGauge('gaugePharma', aPh, tPh, 'gaugePharmaValue', 'gaugePharmaPct');
+        updateGauge('gaugePL', aPl, tPl, 'gaugePLValue', 'gaugePLPct');
+
+        // compute rank (API must support ?all=true)
+        computeRank(email);
+
+      } catch(err){
+        console.error("Load error", err);
+        alert("Unable to load sales data — check Apps Script API.");
+      }
     }
 
+    /* Compute rank by summing pharma% + pl% */
+    async function computeRank(email){
+      try {
+        const res = await fetch(API_URL + "?all=true");
+        const all = await res.json();
+        if(!all || !all.length){ document.getElementById("rankValue").textContent = "-"; return; }
+        const scores = all.map(r=>{
+          let p = Number(String(r.achievedPharmaPercent).replace(/,/g,''))||0;
+          let l = Number(String(r.achievedPLPercent).replace(/,/g,''))||0;
+          if(p>0 && p<=1) p *= 100;
+          if(l>0 && l<=1) l *= 100;
+          return { email:(r.email||"").toLowerCase().trim(), score: p + l };
+        });
+        scores.sort((a,b)=>b.score - a.score);
+        const idx = scores.findIndex(s => s.email === (email||"").toLowerCase().trim());
+        document.getElementById("rankValue").textContent = idx === -1 ? "-" : (idx+1);
+      } catch(e){
+        console.error("Rank error", e);
+        document.getElementById("rankValue").textContent = "-";
+      }
+    }
+
+    /* Resize handling (gauges are SVG and responsive) */
+    window.addEventListener('resize', ()=>{ /* nothing needed; SVG scales */ });
   </script>
 </body>
 </html>
