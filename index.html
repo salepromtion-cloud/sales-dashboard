@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>Sales Dashboard — Corporate Blue</title>
+  <title>Sales Dashboard — Corporate Clean</title>
   <meta name="viewport" content="width=device-width,initial-scale=1" />
 
   <!-- Firebase v8 (auth) -->
@@ -12,11 +12,11 @@
   <style>
     :root{
       --bg: #f3f6fb;
-      --panel: rgba(255,255,255,0.95);
+      --panel: rgba(255,255,255,0.96);
       --primary: #0f3b82;
-      --accent: #1ea3ff;
-      --success: #16a34a;
+      --accent: #2563eb; /* corporate blue */
       --muted: #6b7280;
+      --success: #16a34a;
       --card-radius: 12px;
       --shadow: 0 8px 28px rgba(16,24,40,0.07);
       --glass-shadow: 0 6px 20px rgba(16,24,40,0.06);
@@ -78,13 +78,17 @@
     .muted-small{font-size:12px;color:var(--muted)}
 
     @media (max-width:980px){ .grid{grid-template-columns:1fr} .gauges-row{flex-direction:column} .brand .title{font-size:18px} }
+
+    /* LABEL STYLES (for gauge numeric & pct) */
+    .gauge-value{font-weight:800;font-size:18px;margin-top:8px;color:#07123a;text-align:center}
+    .gauge-pct{font-size:13px;color:var(--muted);text-align:center;margin-top:4px}
   </style>
 </head>
 <body>
   <div class="container">
     <header>
       <div class="brand">
-        <!-- Using uploaded PNG logo (fast loading). Path resolved at deploy -->
+        <!-- Use local PNG path (we used this path previously) -->
         <img class="logo" src="/mnt/data/Aushad Logo.png" alt="Company Logo">
         <div>
           <div class="title">Sales Performance Dashboard</div>
@@ -172,20 +176,20 @@
             </div>
           </div>
 
-          <!-- Gauges row (side-by-side) -->
+          <!-- Gauges row (corporate clean speedometers) -->
           <div class="gauges-row">
             <div class="gauge-card card">
               <div class="muted-small">Pharma — Target vs Achieved</div>
               <div id="gaugePharma" style="height:170px;margin-top:8px"></div>
-              <div id="gaugePharmaValue" style="margin-top:10px;font-weight:800;font-size:18px">-</div>
-              <div id="gaugePharmaPct" class="muted-small">-</div>
+              <div id="gaugePharmaValue" class="gauge-value">-</div>
+              <div id="gaugePharmaPct" class="gauge-pct">-</div>
             </div>
 
             <div class="gauge-card card">
               <div class="muted-small">PL — Target vs Achieved</div>
               <div id="gaugePL" style="height:170px;margin-top:8px"></div>
-              <div id="gaugePLValue" style="margin-top:10px;font-weight:800;font-size:18px">-</div>
-              <div id="gaugePLPct" class="muted-small">-</div>
+              <div id="gaugePLValue" class="gauge-value">-</div>
+              <div id="gaugePLPct" class="gauge-pct">-</div>
             </div>
           </div>
 
@@ -255,49 +259,92 @@
       let total=0; for(let i=1;i<=last;i++){ const dt=new Date(y,m,i); if(dt.getDay()!==0) total++; } return Math.max(1,total);
     }
 
-    /* ---------------- SVG Semicircle Gauges ----------------
-       Formula: percent = Achieved / Target * 100 (C1)
-       Display: Value (big) and % (small) below
-    ----------------------------------------------------------*/
-    function createGauge(containerId){
+    /* ---------------- Speedometer-style gauge (corporate clean) ----------------
+       - createSpeedo(containerId): builds SVG
+       - updateSpeedo(containerId, achieved, target, valueElId, pctElId): draws arc & animates needle
+       Formula used: pct = Achieved / Target * 100  (C1)
+    ------------------------------------------------------------------------------*/
+
+    function createSpeedo(containerId){
       const container = document.getElementById(containerId);
       if(!container) return;
-      container.innerHTML = '';
+      container.innerHTML = ''; // clear
       const svgNS = "http://www.w3.org/2000/svg";
-      const svg = document.createElementNS(svgNS,"svg");
-      svg.setAttribute("viewBox","0 0 300 160");
-      svg.setAttribute("width","100%");
-      svg.setAttribute("height","100%");
-      const g = document.createElementNS(svgNS,"g");
-      g.setAttribute("transform","translate(150,140)");
+      const svg = document.createElementNS(svgNS,'svg');
+      svg.setAttribute('viewBox','0 0 320 180');
+      svg.setAttribute('width','100%');
+      svg.setAttribute('height','100%');
+      svg.style.display = 'block';
+
+      // group centered at bottom-middle (pivot at 160,140)
+      const g = document.createElementNS(svgNS,'g');
+      g.setAttribute('transform','translate(160,140)');
       svg.appendChild(g);
 
-      // base arc
-      const base = document.createElementNS(svgNS,"path");
-      base.setAttribute("d", arcPath(0,0,100,180,0));
-      base.setAttribute("fill","none");
-      base.setAttribute("stroke","#eef6ff");
-      base.setAttribute("stroke-width","20");
-      base.setAttribute("stroke-linecap","round");
-      g.appendChild(base);
+      // background arc
+      const bg = document.createElementNS(svgNS,'path');
+      bg.setAttribute('d', arcPath(0,0,120,180,0));
+      bg.setAttribute('fill','none');
+      bg.setAttribute('stroke','#e9eef5');
+      bg.setAttribute('stroke-width','22');
+      bg.setAttribute('stroke-linecap','round');
+      g.appendChild(bg);
 
-      // achieved arc (initially zero)
-      const ach = document.createElementNS(svgNS,"path");
-      ach.setAttribute("d", arcPath(0,0,100,180,180));
-      ach.setAttribute("fill","none");
-      ach.setAttribute("stroke","#1ea3ff");
-      ach.setAttribute("stroke-width","20");
-      ach.setAttribute("stroke-linecap","round");
-      ach.setAttribute("id","ach_"+containerId);
-      g.appendChild(ach);
+      // active arc (achieved) initially at zero length (180->180)
+      const act = document.createElementNS(svgNS,'path');
+      act.setAttribute('d', arcPath(0,0,120,180,180));
+      act.setAttribute('fill','none');
+      act.setAttribute('stroke',getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#2563eb');
+      act.setAttribute('stroke-width','22');
+      act.setAttribute('stroke-linecap','round');
+      act.setAttribute('id','active_'+containerId);
+      g.appendChild(act);
 
-      // center dot
-      const center = document.createElementNS(svgNS,"circle");
-      center.setAttribute("r","6"); center.setAttribute("cx","0"); center.setAttribute("cy","0"); center.setAttribute("fill","#07123a");
-      g.appendChild(center);
+      // needle group
+      const needle = document.createElementNS(svgNS,'g');
+      needle.setAttribute('id','needle_'+containerId);
+      // needle path (thin)
+      const nd = document.createElementNS(svgNS,'path');
+      nd.setAttribute('d','M0,-6 L92,-1 L92,3 L0,0 Z');
+      nd.setAttribute('fill','#0b1220'); // near-black needle
+      nd.setAttribute('opacity','0.95');
+      needle.appendChild(nd);
+      // pivot
+      const pivot = document.createElementNS(svgNS,'circle');
+      pivot.setAttribute('r','5.5');
+      pivot.setAttribute('cx','0');
+      pivot.setAttribute('cy','0');
+      pivot.setAttribute('fill','#07123a');
+      needle.appendChild(pivot);
+
+      g.appendChild(needle);
+
+      // min label left (0)
+      const leftLabel = document.createElementNS(svgNS,'text');
+      leftLabel.setAttribute('x', -120);
+      leftLabel.setAttribute('y', 10);
+      leftLabel.setAttribute('text-anchor','middle');
+      leftLabel.setAttribute('font-size','12');
+      leftLabel.setAttribute('fill','#334155');
+      leftLabel.setAttribute('id','min_'+containerId);
+      leftLabel.textContent = '0';
+      svg.appendChild(leftLabel);
+
+      // max label right (we'll set later)
+      const rightLabel = document.createElementNS(svgNS,'text');
+      rightLabel.setAttribute('x', 160);
+      rightLabel.setAttribute('y', 10);
+      rightLabel.setAttribute('text-anchor','middle');
+      rightLabel.setAttribute('font-size','12');
+      rightLabel.setAttribute('fill','#334155');
+      rightLabel.setAttribute('id','max_'+containerId);
+      rightLabel.textContent = '0';
+      svg.appendChild(rightLabel);
 
       container.appendChild(svg);
     }
+
+    // helper math
     function polarToCartesian(cx,cy,r,angleDeg){
       const angleRad = (angleDeg-90) * Math.PI / 180.0;
       return { x: cx + r * Math.cos(angleRad), y: cy + r * Math.sin(angleRad) };
@@ -308,30 +355,52 @@
       const largeArcFlag = (endAngle - startAngle) <= 180 ? "0" : "1";
       return ["M", start.x, start.y, "A", r, r, 0, largeArcFlag, 0, end.x, end.y].join(" ");
     }
-    function updateGauge(containerId, achieved, target, valueElId, pctElId){
-      const achArc = document.getElementById('ach_'+containerId);
-      if(!achArc) return;
+
+    function updateSpeedo(containerId, achieved, target, valueElId, pctElId){
+      const act = document.getElementById('active_'+containerId);
+      const needle = document.getElementById('needle_'+containerId);
+      const maxLabel = document.getElementById('max_'+containerId);
+      if(!act || !needle) return;
+
       const max = Math.max(1, target);
+      // percent 0..1
       const pct = target === 0 ? 0 : Math.min(1, achieved / max);
       const displayPct = Math.round((target === 0 ? 0 : (achieved / max) * 100));
       const over = achieved > target;
 
+      // angle mapping: pct 0 -> 180deg, pct 1 -> 0deg
       const start = 180, end = 0;
-      const toAngle = start - (start - end) * pct;
-      const newD = arcPath(0,0,100,180,toAngle);
-      achArc.setAttribute('d', newD);
-      achArc.setAttribute('stroke', over ? '#16a34a' : '#1ea3ff');
+      const targetAngle = start - (start - end) * pct;
 
-      // text update
-      const v = document.getElementById(valueElId);
-      const p = document.getElementById(pctElId);
-      if(v) v.textContent = fmtMoney(achieved) + (over ? " ✓ Over Achieved" : "");
-      if(p) p.textContent = (target === 0 ? "0%" : displayPct + "%");
+      // animate arc + needle
+      const duration = 700;
+      const startTime = performance.now();
+      const fromAngle = 180; // animate from 0 fill (180)
+      function tick(now){
+        const t = Math.min(1, (now - startTime) / duration);
+        const eased = 1 - Math.pow(1 - t, 3); // easeOut
+        const angleNow = fromAngle + (targetAngle - fromAngle) * eased;
+        const dNow = arcPath(0,0,120,180,angleNow);
+        act.setAttribute('d', dNow);
+        // rotate needle: we use (angleNow - 90) so needle points along the arc
+        needle.setAttribute('transform','rotate(' + (angleNow - 90) + ')');
+        if(t < 1) requestAnimationFrame(tick);
+      }
+      requestAnimationFrame(tick);
+
+      // update text labels below
+      const vEl = document.getElementById(valueElId);
+      const pEl = document.getElementById(pctElId);
+      if(vEl) vEl.textContent = fmtMoney(achieved) + (over ? " ✓" : "");
+      if(pEl) pEl.textContent = (target === 0 ? "0%" : displayPct + "%");
+
+      // set max label text (right side)
+      if(maxLabel) maxLabel.textContent = fmtMoney(target);
     }
 
-    /* Create gauges initially */
-    createGauge('gaugePharma');
-    createGauge('gaugePL');
+    // create both speedometers
+    createSpeedo('gaugePharma');
+    createSpeedo('gaugePL');
 
     /* ---------------- Apps Script API ---------------- */
     const API_URL = "https://script.google.com/macros/s/AKfycbwHPdcB4MLaKu3VUDNfpkpiWEvnz3nRhwbbna0-5dn0dlO-ICf6913k8n9yMScc3fO8/exec";
@@ -348,7 +417,6 @@
         document.getElementById("loginBtn").style.display="inline-block";
         document.getElementById("logoutBtn").style.display="none";
         document.getElementById("userInfo").textContent = "Please login";
-        // clear content if needed
       }
     });
 
@@ -358,7 +426,7 @@
     };
     document.getElementById("logoutBtn").onclick = () => auth.signOut();
 
-    /* Load single row for user and update UI */
+    /* Fetch and populate single user row */
     async function loadDataForUser(email){
       try {
         const res = await fetch(API_URL + "?email=" + encodeURIComponent(email));
@@ -377,19 +445,20 @@
         document.getElementById("targetPharma").textContent = fmtMoney(tPh);
         document.getElementById("pharmaSales").textContent = fmtMoney(aPh);
         document.getElementById("pendingPharma").textContent = fmtMoney(pPh);
-        const phPct = Number(String(row.achievedPharmaPercent).replace(/,/g,''))||0;
-        document.getElementById("achievedPharmaPercent").textContent = (phPct>0 && phPct<=1)? Math.round(phPct*100)+"%": Math.round(phPct)+"%";
+        const phPctRaw = Number(String(row.achievedPharmaPercent).replace(/,/g,'')) || 0;
+        document.getElementById("achievedPharmaPercent").textContent = (phPctRaw>0 && phPctRaw<=1) ? Math.round(phPctRaw*100)+"%" : Math.round(phPctRaw)+"%";
 
         document.getElementById("targetPL").textContent = fmtMoney(tPl);
         document.getElementById("plSales").textContent = fmtMoney(aPl);
         document.getElementById("pendingPL").textContent = fmtMoney(pPl);
-        const plPct = Number(String(row.achievedPLPercent).replace(/,/g,''))||0;
-        document.getElementById("achievedPLPercent").textContent = (plPct>0 && plPct<=1)? Math.round(plPct*100)+"%": Math.round(plPct)+"%";
+        const plPctRaw = Number(String(row.achievedPLPercent).replace(/,/g,'')) || 0;
+        document.getElementById("achievedPLPercent").textContent = (plPctRaw>0 && plPctRaw<=1) ? Math.round(plPctRaw*100)+"%" : Math.round(plPctRaw)+"%";
 
-        // run rates
+        // Run rates
         const Wpassed = countWorkingDaysTillToday();
         const Wrem = countRemainingWorkingDays();
         const Wtotal = countWorkingDaysTotal();
+
         const pharmaCRR = Math.round(aPh / Math.max(1,Wpassed));
         const pharmaRRR = Wrem>0 ? Math.ceil(Math.max(0,tPh - aPh)/Wrem) : Math.max(0,tPh - aPh);
         document.getElementById("pharmaCRR").textContent = pharmaCRR===0? "-" : fmtMoney(pharmaCRR);
@@ -400,7 +469,7 @@
         document.getElementById("plCRR").textContent = plCRR===0? "-" : fmtMoney(plCRR);
         document.getElementById("plRRR").textContent = fmtMoney(plRRR);
 
-        // projections
+        // projections display
         const pharmaProjected = Math.round(pharmaCRR * Wtotal);
         const pharmaProjectedGap = Math.max(0, tPh - pharmaProjected);
         document.getElementById("trend_pharma_crr").textContent = pharmaCRR===0? "-" : fmtMoney(pharmaCRR);
@@ -413,11 +482,11 @@
         document.getElementById("trend_pl_projected").textContent = fmtMoney(plProjected);
         document.getElementById("trend_pl_gap").textContent = fmtMoney(plProjectedGap);
 
-        // update gauges using Achieved / Target * 100
-        updateGauge('gaugePharma', aPh, tPh, 'gaugePharmaValue', 'gaugePharmaPct');
-        updateGauge('gaugePL', aPl, tPl, 'gaugePLValue', 'gaugePLPct');
+        // update speedometer gauges (formula C1)
+        updateSpeedo('gaugePharma', aPh, tPh, 'gaugePharmaValue', 'gaugePharmaPct');
+        updateSpeedo('gaugePL', aPl, tPl, 'gaugePLValue', 'gaugePLPct');
 
-        // compute rank (API must support ?all=true)
+        // compute rank
         computeRank(email);
 
       } catch(err){
@@ -426,7 +495,7 @@
       }
     }
 
-    /* Compute rank by summing pharma% + pl% */
+    /* compute rank */
     async function computeRank(email){
       try {
         const res = await fetch(API_URL + "?all=true");
@@ -448,9 +517,9 @@
       }
     }
 
-    /* Resize handling (gauges are SVG and responsive) */
-    window.addEventListener('resize', ()=>{ /* nothing needed; SVG scales */ });
+    /* resize hook (SVG scales automatically) */
+    window.addEventListener('resize', ()=>{ /* no-op */ });
+
   </script>
 </body>
 </html>
-
