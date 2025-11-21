@@ -2,89 +2,64 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>Sales Dashboard — Corporate Blue</title>
+  <title>Sales Dashboard — Half-Donut Gauges</title>
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-
-  <!-- Firebase v8 (auth) -->
+  <!-- Firebase v8 -->
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
 
   <style>
     :root{
-      --bg: #f3f6fb;
-      --panel: rgba(255,255,255,0.95);
-      --primary: #0f3b82;
-      --accent: #1ea3ff;
-      --success: #16a34a;
-      --muted: #6b7280;
-      --card-radius: 12px;
-      --shadow: 0 8px 28px rgba(16,24,40,0.07);
-      --glass-shadow: 0 6px 20px rgba(16,24,40,0.06);
-      font-family: Inter, "Segoe UI", Roboto, Arial, sans-serif;
+      --bg:#f4f8ff; --primary:#0f3b82; --accent:#14a0d6; --accent-dark:#0f66a1;
+      --muted:#6b7280; --card:#ffffff; --radius:12px;
+      --gauge-filled:#14a0d6; --gauge-needle:#f3b233; --gauge-empty:#e9eef5;
+      font-family:Inter, "Segoe UI", Roboto, Arial, sans-serif;
     }
-    html,body{height:100%;margin:0}
-    body{
-      margin:0;
-      padding:20px;
-      background: linear-gradient(180deg,#f7f9fc 0%,#eef6ff 100%);
-      color:#07123a;
-      -webkit-font-smoothing:antialiased;
-      -moz-osx-font-smoothing:grayscale;
-    }
-
+    body{margin:0;background:linear-gradient(180deg,#f8fbff,#eef6ff);color:#07123a;padding:18px}
     .container{max-width:1200px;margin:0 auto}
-
-    /* Header */
     header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px}
     .brand{display:flex;align-items:center;gap:12px}
-    .brand img.logo{height:45px; border-radius:8px; object-fit:contain; box-shadow:var(--glass-shadow); background:white; padding:6px}
-    .brand .title{font-size:20px;color:var(--primary);font-weight:700}
-    .brand .subtitle{font-size:12px;color:var(--muted)}
-
+    .brand img.logo{height:45px;border-radius:8px;object-fit:contain;background:#fff;padding:6px;box-shadow:0 6px 18px rgba(15,23,42,0.06)}
+    .title{font-size:20px;color:var(--primary);font-weight:700}
+    .subtitle{font-size:12px;color:var(--muted)}
     .top-right{display:flex;align-items:center;gap:10px}
-    .btn{border-radius:8px;padding:8px 12px;border:none;cursor:pointer}
-    .btn-primary{background:var(--primary);color:white}
-    .btn-outline{background:white;border:1px solid rgba(15,59,130,0.12);color:var(--primary)}
+    .btn{padding:8px 12px;border-radius:8px;border:none;cursor:pointer}
+    .btn-primary{background:var(--primary);color:#fff}
+    .btn-outline{background:#fff;border:1px solid rgba(15,59,130,0.12);color:var(--primary)}
 
-    /* Grid */
     .grid{display:grid;grid-template-columns:2fr 1fr;gap:16px}
+    .card{background:var(--card);border-radius:var(--radius);padding:14px;box-shadow:0 10px 30px rgba(16,24,40,0.06)}
+    .section-title{font-weight:700;color:var(--primary);margin-bottom:10px}
 
-    /* Card */
-    .card{background:var(--panel);border-radius:var(--card-radius);padding:14px;box-shadow:var(--shadow);border:1px solid rgba(255,255,255,0.6)}
-    .section-title{font-weight:700;color:var(--primary);font-size:14px;margin-bottom:10px}
-
-    /* KPI tiles */
     .kpi{display:flex;gap:12px;flex-wrap:wrap}
-    .tile{flex:1;min-width:140px;background:white;border-radius:10px;padding:12px;border:1px solid #eef3ff;box-shadow:var(--glass-shadow);text-align:center}
+    .tile{flex:1;min-width:140px;background:#fff;border-radius:10px;padding:12px;border:1px solid #eef3ff;text-align:center}
     .tile h4{margin:0;font-size:12px;color:var(--muted)}
-    .tile p{margin:6px 0 0;font-size:18px;font-weight:800;color:#07123a}
+    .tile p{margin:6px 0 0;font-size:18px;font-weight:800}
 
-    /* Run rate small boxes */
-    .row-flex{display:flex;gap:12px;flex-wrap:wrap}
+    .row-flex{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:14px}
     .half{flex:1;min-width:150px}
-    .small-box{background:white;border-radius:10px;padding:12px;border:1px solid #eef3ff;box-shadow:var(--glass-shadow);text-align:center}
-    .small-box .title{font-weight:800;font-size:13px;color:var(--primary)}
+    .small-box{background:#fff;border-radius:10px;padding:12px;border:1px solid #eef3ff;text-align:center}
+    .small-box .title{font-weight:800;color:var(--primary);font-size:13px}
     .small-box .subtitle{font-size:12px;color:var(--muted);margin-bottom:6px}
-    .small-box .value{font-weight:800;font-size:20px;color:#07123a}
+    .small-box .value{font-weight:800;font-size:20px}
 
-    /* Gauges row */
     .gauges-row{display:flex;gap:12px;margin-top:14px;align-items:center}
-    .gauge-card{flex:1;background:linear-gradient(180deg,#ffffff,#fbfdff);border-radius:12px;padding:14px;border:1px solid #eef5ff;box-shadow:var(--glass-shadow);text-align:center}
+    .gauge-card{flex:1;background:linear-gradient(180deg,#fff,#fbfdff);border-radius:12px;padding:16px;border:1px solid #eef5ff;text-align:center}
 
-    /* Right column */
-    .rank-box{background:linear-gradient(180deg,#1f3f7a,#17335e);color:white;padding:18px;border-radius:12px;text-align:center;box-shadow:0 10px 30px rgba(15,23,42,0.12);margin-bottom:12px}
-    .trend-box{margin-top:12px;background:white;border-radius:10px;padding:12px;border:1px solid #eef3ff;box-shadow:var(--glass-shadow)}
+    .gauge-label{font-weight:800;font-size:18px;margin-top:10px}
+    .gauge-pct{font-size:13px;color:var(--muted);margin-top:4px}
 
-    .muted-small{font-size:12px;color:var(--muted)}
+    .rank-box{background:linear-gradient(180deg,#1f3f7a,#17335e);color:#fff;padding:16px;border-radius:12px;text-align:center;margin-bottom:12px}
+    .trend-box{background:#fff;border-radius:10px;padding:12px;border:1px solid #eef3ff;margin-bottom:12px}
 
-    @media (max-width:980px){ .grid{grid-template-columns:1fr} .gauges-row{flex-direction:column} .brand .title{font-size:18px} }
+    @media (max-width:980px){ .grid{grid-template-columns:1fr} .gauges-row{flex-direction:column} }
   </style>
 </head>
 <body>
   <div class="container">
     <header>
       <div class="brand">
-        <!-- Using uploaded PNG logo (fast loading). Path resolved at deploy -->
+        <!-- local path to uploaded logo (as requested) -->
         <img class="logo" src="/mnt/data/Aushad Logo.png" alt="Company Logo">
         <div>
           <div class="title">Sales Performance Dashboard</div>
@@ -93,7 +68,7 @@
       </div>
 
       <div class="top-right">
-        <div id="userInfo" style="display:flex;align-items:center;gap:8px;color:var(--muted)">Please login</div>
+        <div id="userInfo" style="color:var(--muted)">Please login</div>
         <button id="loginBtn" class="btn btn-primary">Login with Google</button>
         <button id="logoutBtn" class="btn btn-outline" style="display:none">Logout</button>
       </div>
@@ -102,94 +77,91 @@
     <main class="grid">
       <!-- LEFT -->
       <div class="card">
-
-        <div>
-          <div class="section-title">Pharma Performance</div>
-          <div class="kpi" style="margin-bottom:12px">
-            <div class="tile">
-              <h4>Target Pharma</h4>
-              <p id="targetPharma">-</p>
-            </div>
-            <div class="tile">
-              <h4>Achieved Pharma</h4>
-              <p id="pharmaSales">-</p>
-            </div>
-            <div class="tile">
-              <h4>Pending Pharma</h4>
-              <p id="pendingPharma">-</p>
-            </div>
-            <div class="tile">
-              <h4>Pharma %</h4>
-              <p id="achievedPharmaPercent">-</p>
-            </div>
+        <div class="section-title">Pharma Performance</div>
+        <div class="kpi" style="margin-bottom:12px">
+          <div class="tile">
+            <h4>Target Pharma</h4>
+            <p id="targetPharma">-</p>
           </div>
-
-          <div class="section-title">Pharma Run Rate</div>
-          <div class="row-flex" style="margin-bottom:14px">
-            <div class="half small-box">
-              <div class="title">Daily Pharma Average (CRR)</div>
-              <div class="subtitle">(CRR) / day</div>
-              <div class="value" id="pharmaCRR">-</div>
-            </div>
-            <div class="half small-box">
-              <div class="title">Daily Pharma Needed (RRR)</div>
-              <div class="subtitle">(RRR) / day</div>
-              <div class="value" id="pharmaRRR">-</div>
-            </div>
+          <div class="tile">
+            <h4>Achieved Pharma</h4>
+            <p id="pharmaSales">-</p>
           </div>
-
-          <div class="section-title">PL Performance</div>
-          <div class="kpi" style="margin-bottom:12px">
-            <div class="tile">
-              <h4>Target PL</h4>
-              <p id="targetPL">-</p>
-            </div>
-            <div class="tile">
-              <h4>Achieved PL</h4>
-              <p id="plSales">-</p>
-            </div>
-            <div class="tile">
-              <h4>Pending PL</h4>
-              <p id="pendingPL">-</p>
-            </div>
-            <div class="tile">
-              <h4>PL %</h4>
-              <p id="achievedPLPercent">-</p>
-            </div>
+          <div class="tile">
+            <h4>Pending Pharma</h4>
+            <p id="pendingPharma">-</p>
           </div>
-
-          <div class="section-title">PL Run Rate</div>
-          <div class="row-flex" style="margin-bottom:14px">
-            <div class="half small-box">
-              <div class="title">Daily PL Average (CRR)</div>
-              <div class="subtitle">(CRR) / day</div>
-              <div class="value" id="plCRR">-</div>
-            </div>
-            <div class="half small-box">
-              <div class="title">Daily PL Needed (RRR)</div>
-              <div class="subtitle">(RRR) / day</div>
-              <div class="value" id="plRRR">-</div>
-            </div>
+          <div class="tile">
+            <h4>Pharma %</h4>
+            <p id="achievedPharmaPercent">-</p>
           </div>
-
-          <!-- Gauges row (side-by-side) -->
-          <div class="gauges-row">
-            <div class="gauge-card card">
-              <div class="muted-small">Pharma — Target vs Achieved</div>
-              <div id="gaugePharma" style="height:170px;margin-top:8px"></div>
-              <div id="gaugePharmaValue" style="margin-top:10px;font-weight:800;font-size:18px">-</div>
-              <div id="gaugePharmaPct" class="muted-small">-</div>
-            </div>
-
-            <div class="gauge-card card">
-              <div class="muted-small">PL — Target vs Achieved</div>
-              <div id="gaugePL" style="height:170px;margin-top:8px"></div>
-              <div id="gaugePLValue" style="margin-top:10px;font-weight:800;font-size:18px">-</div>
-              <div id="gaugePLPct" class="muted-small">-</div>
-            </div>
-          </div>
-
         </div>
+
+        <div class="section-title">Pharma Run Rate</div>
+        <div class="row-flex">
+          <div class="half small-box">
+            <div class="title">Daily Pharma Average (CRR)</div>
+            <div class="subtitle">(CRR) / day</div>
+            <div class="value" id="pharmaCRR">-</div>
+          </div>
+          <div class="half small-box">
+            <div class="title">Daily Pharma Needed (RRR)</div>
+            <div class="subtitle">(RRR) / day</div>
+            <div class="value" id="pharmaRRR">-</div>
+          </div>
+        </div>
+
+        <div class="section-title">PL Performance</div>
+        <div class="kpi" style="margin-bottom:12px">
+          <div class="tile">
+            <h4>Target PL</h4>
+            <p id="targetPL">-</p>
+          </div>
+          <div class="tile">
+            <h4>Achieved PL</h4>
+            <p id="plSales">-</p>
+          </div>
+          <div class="tile">
+            <h4>Pending PL</h4>
+            <p id="pendingPL">-</p>
+          </div>
+          <div class="tile">
+            <h4>PL %</h4>
+            <p id="achievedPLPercent">-</p>
+          </div>
+        </div>
+
+        <div class="section-title">PL Run Rate</div>
+        <div class="row-flex">
+          <div class="half small-box">
+            <div class="title">Daily PL Average (CRR)</div>
+            <div class="subtitle">(CRR) / day</div>
+            <div class="value" id="plCRR">-</div>
+          </div>
+          <div class="half small-box">
+            <div class="title">Daily PL Needed (RRR)</div>
+            <div class="subtitle">(RRR) / day</div>
+            <div class="value" id="plRRR">-</div>
+          </div>
+        </div>
+
+        <!-- NEW: Half-donut gauges row -->
+        <div class="gauges-row">
+          <div class="gauge-card">
+            <div class="muted-small">Pharma — Target vs Achieved</div>
+            <div id="halfGaugePharma" style="height:160px;margin-top:8px"></div>
+            <div id="gph_val" class="gauge-label">-</div>
+            <div id="gph_pct" class="gauge-pct">-</div>
+          </div>
+
+          <div class="gauge-card">
+            <div class="muted-small">PL — Target vs Achieved</div>
+            <div id="halfGaugePL" style="height:160px;margin-top:8px"></div>
+            <div id="gpl_val" class="gauge-label">-</div>
+            <div id="gpl_pct" class="gauge-pct">-</div>
+          </div>
+        </div>
+
       </div>
 
       <!-- RIGHT -->
@@ -224,7 +196,7 @@
   </div>
 
   <script>
-    /* ---------------- Firebase config ---------------- */
+    /* ---------- Firebase config ---------- */
     const firebaseConfig = {
       apiKey: "AIzaSyAtdeN84prygknfyF-aZ7d6Wr0m2LYSFek",
       authDomain: "salesdashboard-8a33e.firebaseapp.com",
@@ -236,134 +208,185 @@
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
 
-    /* ---------------- Helpers ---------------- */
+    /* ---------- Helpers ---------- */
     function safeNum(v){ if(v===undefined||v===null||v==="") return 0; v=(v+"").replace(/,/g,"").trim(); return Number(v)||0; }
     function fmtMoney(n){ return new Intl.NumberFormat("en-IN").format(Math.round(n)); }
-    function fmtPct(n){ if(isNaN(n)) return "0%"; return Math.round(n) + "%"; }
 
-    /* Working days helpers */
     function countWorkingDaysTillToday() {
-      const today = new Date(); const y=today.getFullYear(), m=today.getMonth(), d=today.getDate();
+      const today=new Date(); const y=today.getFullYear(), m=today.getMonth(), d=today.getDate();
       let wd=0; for(let i=1;i<=d;i++){ const dt=new Date(y,m,i); if(dt.getDay()!==0) wd++; } return Math.max(1,wd);
     }
     function countRemainingWorkingDays() {
-      const today=new Date(); const y=today.getFullYear(), m=today.getMonth(), last=new Date(y,m+1,0).getDate();
+      const today=new Date(); const y=today.getFullYear(), m=today.getMonth(); const last=new Date(y,m+1,0).getDate();
       let rem=0; for(let i=today.getDate()+1;i<=last;i++){ const dt=new Date(y,m,i); if(dt.getDay()!==0) rem++; } return rem;
     }
     function countWorkingDaysTotal() {
-      const today=new Date(); const y=today.getFullYear(), m=today.getMonth(), last=new Date(y,m+1,0).getDate();
+      const today=new Date(); const y=today.getFullYear(), m=today.getMonth(); const last=new Date(y,m+1,0).getDate();
       let total=0; for(let i=1;i<=last;i++){ const dt=new Date(y,m,i); if(dt.getDay()!==0) total++; } return Math.max(1,total);
     }
 
-    /* ---------------- SVG Semicircle Gauges ----------------
-       Formula: percent = Achieved / Target * 100 (C1)
-       Display: Value (big) and % (small) below
-    ----------------------------------------------------------*/
-    function createGauge(containerId){
-      const container = document.getElementById(containerId);
-      if(!container) return;
-      container.innerHTML = '';
-      const svgNS = "http://www.w3.org/2000/svg";
-      const svg = document.createElementNS(svgNS,"svg");
-      svg.setAttribute("viewBox","0 0 300 160");
-      svg.setAttribute("width","100%");
-      svg.setAttribute("height","100%");
-      const g = document.createElementNS(svgNS,"g");
-      g.setAttribute("transform","translate(150,140)");
+    /* ---------- Half-donut gauge (simple, clean) ---------- 
+       createHalfGauge(containerId) -> builds svg
+       setHalfGauge(containerId, achieved, target, valueEl, pctEl)
+    */
+    function createHalfGauge(containerId){
+      const cont = document.getElementById(containerId);
+      if(!cont) return;
+      cont.innerHTML = '';
+      const ns = "http://www.w3.org/2000/svg";
+      const svg = document.createElementNS(ns,'svg');
+      svg.setAttribute('viewBox','0 0 260 140');
+      svg.setAttribute('width','100%');
+      svg.setAttribute('height','100%');
+
+      // group centered at (130,110)
+      const g = document.createElementNS(ns,'g');
+      g.setAttribute('transform','translate(130,110)');
       svg.appendChild(g);
 
-      // base arc
-      const base = document.createElementNS(svgNS,"path");
-      base.setAttribute("d", arcPath(0,0,100,180,0));
-      base.setAttribute("fill","none");
-      base.setAttribute("stroke","#eef6ff");
-      base.setAttribute("stroke-width","20");
-      base.setAttribute("stroke-linecap","round");
-      g.appendChild(base);
+      // background arc (empty)
+      const bg = document.createElementNS(ns,'path');
+      bg.setAttribute('d', arc(0,0,92,180,0));
+      bg.setAttribute('fill','none');
+      bg.setAttribute('stroke', getComputedStyle(document.documentElement).getPropertyValue('--gauge-empty') || '#e9eef5');
+      bg.setAttribute('stroke-width','22');
+      bg.setAttribute('stroke-linecap','round');
+      g.appendChild(bg);
 
-      // achieved arc (initially zero)
-      const ach = document.createElementNS(svgNS,"path");
-      ach.setAttribute("d", arcPath(0,0,100,180,180));
-      ach.setAttribute("fill","none");
-      ach.setAttribute("stroke","#1ea3ff");
-      ach.setAttribute("stroke-width","20");
-      ach.setAttribute("stroke-linecap","round");
-      ach.setAttribute("id","ach_"+containerId);
-      g.appendChild(ach);
+      // filled arc (achieved)
+      const filled = document.createElementNS(ns,'path');
+      filled.setAttribute('d', arc(0,0,92,180,180)); // start at empty
+      filled.setAttribute('fill','none');
+      filled.setAttribute('stroke', getComputedStyle(document.documentElement).getPropertyValue('--gauge-filled') || '#14a0d6');
+      filled.setAttribute('stroke-width','22');
+      filled.setAttribute('stroke-linecap','round');
+      filled.setAttribute('id', 'filled_'+containerId);
+      g.appendChild(filled);
 
-      // center dot
-      const center = document.createElementNS(svgNS,"circle");
-      center.setAttribute("r","6"); center.setAttribute("cx","0"); center.setAttribute("cy","0"); center.setAttribute("fill","#07123a");
-      g.appendChild(center);
+      // needle group (rotate)
+      const needle = document.createElementNS(ns,'g');
+      needle.setAttribute('id','needle_'+containerId);
+      // needle path (short tapered)
+      const nd = document.createElementNS(ns,'path');
+      nd.setAttribute('d','M0,-5 L70,-2 L70,2 L0,0 Z');
+      nd.setAttribute('fill', getComputedStyle(document.documentElement).getPropertyValue('--gauge-needle') || '#f3b233');
+      nd.setAttribute('opacity','0.95');
+      needle.appendChild(nd);
+      // pivot
+      const pivot = document.createElementNS(ns,'circle');
+      pivot.setAttribute('r','5');
+      pivot.setAttribute('fill','#07123a');
+      needle.appendChild(pivot);
+      g.appendChild(needle);
 
-      container.appendChild(svg);
+      // left and right min/max labels (outside)
+      const left = document.createElementNS(ns,'text');
+      left.setAttribute('x', -92);
+      left.setAttribute('y', 14);
+      left.setAttribute('font-size',12);
+      left.setAttribute('text-anchor','middle');
+      left.setAttribute('fill','#334155');
+      left.setAttribute('id','min_'+containerId);
+      left.textContent = '0';
+      svg.appendChild(left);
+
+      const right = document.createElementNS(ns,'text');
+      right.setAttribute('x', 260-130);
+      right.setAttribute('y', 14);
+      right.setAttribute('font-size',12);
+      right.setAttribute('text-anchor','middle');
+      right.setAttribute('fill','#334155');
+      right.setAttribute('id','max_'+containerId);
+      right.textContent = '0';
+      svg.appendChild(right);
+
+      cont.appendChild(svg);
     }
-    function polarToCartesian(cx,cy,r,angleDeg){
-      const angleRad = (angleDeg-90) * Math.PI / 180.0;
-      return { x: cx + r * Math.cos(angleRad), y: cy + r * Math.sin(angleRad) };
+
+    // arc helper (from startAngle to endAngle)
+    function polar(cx,cy,r,angle){
+      const rad = (angle - 90) * Math.PI / 180;
+      return { x: cx + r * Math.cos(rad), y: cy + r * Math.sin(rad) };
     }
-    function arcPath(cx,cy,r,startAngle,endAngle){
-      const start = polarToCartesian(cx,cy,r,endAngle);
-      const end = polarToCartesian(cx,cy,r,startAngle);
-      const largeArcFlag = (endAngle - startAngle) <= 180 ? "0" : "1";
-      return ["M", start.x, start.y, "A", r, r, 0, largeArcFlag, 0, end.x, end.y].join(" ");
+    function arc(cx,cy,r,startDeg,endDeg){
+      const start = polar(cx,cy,r,endDeg);
+      const end = polar(cx,cy,r,startDeg);
+      const large = (endDeg - startDeg) <= 180 ? '0' : '1';
+      return ['M', start.x, start.y, 'A', r, r, 0, large, 0, end.x, end.y].join(' ');
     }
-    function updateGauge(containerId, achieved, target, valueElId, pctElId){
-      const achArc = document.getElementById('ach_'+containerId);
-      if(!achArc) return;
+
+    // animate filled arc & rotate needle
+    function setHalfGauge(containerId, achieved, target, valueElId, pctElId){
+      const filled = document.getElementById('filled_'+containerId);
+      const needle = document.getElementById('needle_'+containerId);
+      const maxLabel = document.getElementById('max_'+containerId);
+      if(!filled || !needle) return;
+
       const max = Math.max(1, target);
       const pct = target === 0 ? 0 : Math.min(1, achieved / max);
       const displayPct = Math.round((target === 0 ? 0 : (achieved / max) * 100));
-      const over = achieved > target;
+      // compute angle: 180 -> 0 mapped by pct
+      const startAngle = 180, endAngle = 0;
+      const targetAngle = startAngle - (startAngle - endAngle) * pct;
 
-      const start = 180, end = 0;
-      const toAngle = start - (start - end) * pct;
-      const newD = arcPath(0,0,100,180,toAngle);
-      achArc.setAttribute('d', newD);
-      achArc.setAttribute('stroke', over ? '#16a34a' : '#1ea3ff');
+      // animate over 600ms
+      const startTime = performance.now();
+      const from = 180;
+      function frame(now){
+        const t = Math.min(1, (now - startTime) / 600);
+        const eased = 1 - Math.pow(1 - t, 3);
+        const angleNow = from + (targetAngle - from) * eased;
+        // set filled arc path
+        const p = arc(0,0,92,180, angleNow);
+        filled.setAttribute('d', p);
+        // rotate needle: needle group rotate so its tip aligns; rotate center point mapping
+        needle.setAttribute('transform', 'rotate(' + (angleNow - 90) + ')');
+        if(t < 1) requestAnimationFrame(frame);
+      }
+      requestAnimationFrame(frame);
 
-      // text update
-      const v = document.getElementById(valueElId);
-      const p = document.getElementById(pctElId);
-      if(v) v.textContent = fmtMoney(achieved) + (over ? " ✓ Over Achieved" : "");
-      if(p) p.textContent = (target === 0 ? "0%" : displayPct + "%");
+      // labels below
+      const valEl = document.getElementById(valueElId);
+      const pctEl = document.getElementById(pctElId);
+      if(valEl) valEl.textContent = fmtMoney(achieved) + (achieved > target ? ' ✓' : '');
+      if(pctEl) pctEl.textContent = displayPct + '%';
+      if(maxLabel) maxLabel.textContent = fmtMoney(target);
     }
 
-    /* Create gauges initially */
-    createGauge('gaugePharma');
-    createGauge('gaugePL');
+    /* create both gauges now */
+    createHalfGauge('halfGaugePharma');
+    createHalfGauge('halfGaugePL');
 
-    /* ---------------- Apps Script API ---------------- */
+    /* ---------- Apps Script API ---------- */
     const API_URL = "https://script.google.com/macros/s/AKfycbwHPdcB4MLaKu3VUDNfpkpiWEvnz3nRhwbbna0-5dn0dlO-ICf6913k8n9yMScc3fO8/exec";
 
-    /* Auth handling */
+    /* ---------- Auth ---------- */
     auth.onAuthStateChanged(user=>{
       if(user){
         document.getElementById("loginBtn").style.display="none";
         document.getElementById("logoutBtn").style.display="inline-block";
         const photo = user.photoURL || "";
-        document.getElementById("userInfo").innerHTML = (photo? `<img src='${photo}' style='width:34px;height:34px;border-radius:999px;margin-right:8px;object-fit:cover'>` : "") + (user.displayName || user.email);
+        document.getElementById("userInfo").innerHTML = (photo? `<img src="${photo}" style="width:34px;height:34px;border-radius:999px;margin-right:8px">` : "") + (user.displayName || user.email);
         loadDataForUser(user.email);
       } else {
         document.getElementById("loginBtn").style.display="inline-block";
         document.getElementById("logoutBtn").style.display="none";
         document.getElementById("userInfo").textContent = "Please login";
-        // clear content if needed
       }
     });
 
-    document.getElementById("loginBtn").onclick = () => {
+    document.getElementById("loginBtn").onclick = ()=> {
       const provider = new firebase.auth.GoogleAuthProvider();
       auth.signInWithPopup(provider).catch(e=>console.error(e));
     };
-    document.getElementById("logoutBtn").onclick = () => auth.signOut();
+    document.getElementById("logoutBtn").onclick = ()=> auth.signOut();
 
-    /* Load single row for user and update UI */
+    /* ---------- Load data & populate ---------- */
     async function loadDataForUser(email){
       try {
-        const res = await fetch(API_URL + "?email=" + encodeURIComponent(email));
-        const data = await res.json();
-        if(!data || !data.length){ alert("No sales data found for this email in the Sheet."); return; }
+        const r = await fetch(API_URL + "?email=" + encodeURIComponent(email));
+        const data = await r.json();
+        if(!data || !data.length){ alert("No sales data for this email"); return; }
         const row = data[0];
 
         const tPh = safeNum(row.targetPharma);
@@ -373,23 +396,23 @@
         const aPl = safeNum(row.plSales);
         const pPl = safeNum(row.pendingPL);
 
-        // KPIs
         document.getElementById("targetPharma").textContent = fmtMoney(tPh);
         document.getElementById("pharmaSales").textContent = fmtMoney(aPh);
         document.getElementById("pendingPharma").textContent = fmtMoney(pPh);
-        const phPct = Number(String(row.achievedPharmaPercent).replace(/,/g,''))||0;
-        document.getElementById("achievedPharmaPercent").textContent = (phPct>0 && phPct<=1)? Math.round(phPct*100)+"%": Math.round(phPct)+"%";
+        const phPctRaw = Number(String(row.achievedPharmaPercent).replace(/,/g,'')) || 0;
+        document.getElementById("achievedPharmaPercent").textContent = (phPctRaw>0 && phPctRaw<=1) ? Math.round(phPctRaw*100)+"%" : Math.round(phPctRaw)+"%";
 
         document.getElementById("targetPL").textContent = fmtMoney(tPl);
         document.getElementById("plSales").textContent = fmtMoney(aPl);
         document.getElementById("pendingPL").textContent = fmtMoney(pPl);
-        const plPct = Number(String(row.achievedPLPercent).replace(/,/g,''))||0;
-        document.getElementById("achievedPLPercent").textContent = (plPct>0 && plPct<=1)? Math.round(plPct*100)+"%": Math.round(plPct)+"%";
+        const plPctRaw = Number(String(row.achievedPLPercent).replace(/,/g,'')) || 0;
+        document.getElementById("achievedPLPercent").textContent = (plPctRaw>0 && plPctRaw<=1) ? Math.round(plPctRaw*100)+"%" : Math.round(plPctRaw)+"%";
 
-        // run rates
+        // run rates & projections
         const Wpassed = countWorkingDaysTillToday();
         const Wrem = countRemainingWorkingDays();
         const Wtotal = countWorkingDaysTotal();
+
         const pharmaCRR = Math.round(aPh / Math.max(1,Wpassed));
         const pharmaRRR = Wrem>0 ? Math.ceil(Math.max(0,tPh - aPh)/Wrem) : Math.max(0,tPh - aPh);
         document.getElementById("pharmaCRR").textContent = pharmaCRR===0? "-" : fmtMoney(pharmaCRR);
@@ -400,7 +423,6 @@
         document.getElementById("plCRR").textContent = plCRR===0? "-" : fmtMoney(plCRR);
         document.getElementById("plRRR").textContent = fmtMoney(plRRR);
 
-        // projections
         const pharmaProjected = Math.round(pharmaCRR * Wtotal);
         const pharmaProjectedGap = Math.max(0, tPh - pharmaProjected);
         document.getElementById("trend_pharma_crr").textContent = pharmaCRR===0? "-" : fmtMoney(pharmaCRR);
@@ -413,20 +435,20 @@
         document.getElementById("trend_pl_projected").textContent = fmtMoney(plProjected);
         document.getElementById("trend_pl_gap").textContent = fmtMoney(plProjectedGap);
 
-        // update gauges using Achieved / Target * 100
-        updateGauge('gaugePharma', aPh, tPh, 'gaugePharmaValue', 'gaugePharmaPct');
-        updateGauge('gaugePL', aPl, tPl, 'gaugePLValue', 'gaugePLPct');
+        // set gauges (uses formula Achieved / Target * 100)
+        setHalfGauge('halfGaugePharma', aPh, tPh, 'gph_val', 'gph_pct');
+        setHalfGauge('halfGaugePL', aPl, tPl, 'gpl_val', 'gpl_pct');
 
-        // compute rank (API must support ?all=true)
+        // compute rank
         computeRank(email);
 
       } catch(err){
-        console.error("Load error", err);
-        alert("Unable to load sales data — check Apps Script API.");
+        console.error(err);
+        alert("Unable to load sales data — check API.");
       }
     }
 
-    /* Compute rank by summing pharma% + pl% */
+    /* compute rank across all rows (Apps Script must support ?all=true) */
     async function computeRank(email){
       try {
         const res = await fetch(API_URL + "?all=true");
@@ -442,15 +464,9 @@
         scores.sort((a,b)=>b.score - a.score);
         const idx = scores.findIndex(s => s.email === (email||"").toLowerCase().trim());
         document.getElementById("rankValue").textContent = idx === -1 ? "-" : (idx+1);
-      } catch(e){
-        console.error("Rank error", e);
-        document.getElementById("rankValue").textContent = "-";
-      }
+      } catch(e){ console.error(e); document.getElementById("rankValue").textContent = "-"; }
     }
 
-    /* Resize handling (gauges are SVG and responsive) */
-    window.addEventListener('resize', ()=>{ /* nothing needed; SVG scales */ });
   </script>
 </body>
 </html>
-
