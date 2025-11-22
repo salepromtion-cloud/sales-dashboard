@@ -17,10 +17,12 @@
     }
     body{margin:0;background:linear-gradient(180deg,#f7fbff,#eef6ff);color:#07123a;padding:18px}
     .container{max-width:1100px;margin:0 auto}
+
     header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px}
     .brand {display:flex;flex-direction:column;}
     .brand .title{font-size:20px;color:var(--primary);font-weight:700}
     .brand .subtitle{font-size:12px;color:var(--muted)}
+
     .top-right{display:flex;align-items:center;gap:10px}
     .btn{padding:8px 12px;border-radius:8px;border:none;cursor:pointer}
     .btn-primary{background:var(--primary);color:#fff}
@@ -49,18 +51,23 @@
     .progress-bar-inner{height:100%;background:linear-gradient(90deg,var(--accent),#14a0d6);width:0%;border-radius:12px;transition:width 600ms ease}
     .progress-small{font-size:12px;color:var(--muted);margin-top:6px}
 
-    /* Right column */
+    /* Right Column */
     .rank-box{background:linear-gradient(180deg,#1f3f7a,#17335e);color:#fff;padding:16px;border-radius:12px;text-align:center;margin-bottom:12px}
     .trend-box{background:#fff;border-radius:10px;padding:12px;border:1px solid #eef3ff;margin-bottom:12px}
+
+    .return-box-title{font-weight:700;color:#b91c1c}
+    .return-value{font-weight:700;color:#b91c1c;font-size:18px}
+    .return-percent{font-weight:700;color:#b91c1c;font-size:18px}
 
     @media (max-width:980px){ .grid{grid-template-columns:1fr} }
   </style>
 </head>
+
 <body>
   <div class="container">
     <header>
       <div class="brand">
-        <div class="title">Your Sales Performace Report</div>
+        <div class="title">Your Sales Performance Report</div>
         <div class="subtitle">Live sales view — secure login</div>
       </div>
 
@@ -72,105 +79,63 @@
     </header>
 
     <main class="grid">
-      <!-- LEFT -->
+      
+      <!-- LEFT COLUMN -->
       <div class="card">
+
         <div class="section-title">Pharma Performance</div>
         <div class="kpi" style="margin-bottom:12px">
-          <div class="tile">
-            <h4>Target Pharma</h4>
-            <p id="targetPharma">-</p>
-          </div>
-          <div class="tile">
-            <h4>Achieved Pharma</h4>
-            <p id="pharmaSales">-</p>
-          </div>
-          <div class="tile">
-            <h4>Pending Pharma</h4>
-            <p id="pendingPharma">-</p>
-          </div>
-          <div class="tile">
-            <h4>Pharma %</h4>
-            <p id="achievedPharmaPercent">-</p>
-          </div>
+          <div class="tile"><h4>Target Pharma</h4><p id="targetPharma">-</p></div>
+          <div class="tile"><h4>Achieved Pharma</h4><p id="pharmaSales">-</p></div>
+          <div class="tile"><h4>Pending Pharma</h4><p id="pendingPharma">-</p></div>
+          <div class="tile"><h4>Pharma %</h4><p id="achievedPharmaPercent">-</p></div>
         </div>
 
         <div class="section-title">Pharma Run Rate</div>
-        <div class="row-flex" style="margin-bottom:14px">
-          <div class="half small-box">
-            <div class="title">Daily Pharma Average (CRR)</div>
-            <div class="subtitle">(CRR) / day</div>
-            <div class="value" id="pharmaCRR">-</div>
-          </div>
-          <div class="half small-box">
-            <div class="title">Daily Pharma Needed (RRR)</div>
-            <div class="subtitle">(RRR) / day</div>
-            <div class="value" id="pharmaRRR">-</div>
-          </div>
+        <div class="row-flex">
+          <div class="half small-box"><div class="title">Daily Pharma Average (CRR)</div><div class="subtitle">(CRR) / day</div><div class="value" id="pharmaCRR">-</div></div>
+          <div class="half small-box"><div class="title">Daily Pharma Needed (RRR)</div><div class="subtitle">(RRR) / day</div><div class="value" id="pharmaRRR">-</div></div>
         </div>
 
         <div class="section-title">PL Performance</div>
         <div class="kpi" style="margin-bottom:12px">
-          <div class="tile">
-            <h4>Target PL</h4>
-            <p id="targetPL">-</p>
-          </div>
-          <div class="tile">
-            <h4>Achieved PL</h4>
-            <p id="plSales">-</p>
-          </div>
-          <div class="tile">
-            <h4>Pending PL</h4>
-            <p id="pendingPL">-</p>
-          </div>
-          <div class="tile">
-            <h4>PL %</h4>
-            <p id="achievedPLPercent">-</p>
-          </div>
+          <div class="tile"><h4>Target PL</h4><p id="targetPL">-</p></div>
+          <div class="tile"><h4>Achieved PL</h4><p id="plSales">-</p></div>
+          <div class="tile"><h4>Pending PL</h4><p id="pendingPL">-</p></div>
+          <div class="tile"><h4>PL %</h4><p id="achievedPLPercent">-</p></div>
         </div>
 
         <div class="section-title">PL Run Rate</div>
-        <div class="row-flex" style="margin-bottom:14px">
-          <div class="half small-box">
-            <div class="title">Daily PL Average (CRR)</div>
-            <div class="subtitle">(CRR) / day</div>
-            <div class="value" id="plCRR">-</div>
-          </div>
-          <div class="half small-box">
-            <div class="title">Daily PL Needed (RRR)</div>
-            <div class="subtitle">(RRR) / day</div>
-            <div class="value" id="plRRR">-</div>
-          </div>
+        <div class="row-flex">
+          <div class="half small-box"><div class="title">Daily PL Average (CRR)</div><div class="subtitle">(CRR) / day</div><div class="value" id="plCRR">-</div></div>
+          <div class="half small-box"><div class="title">Daily PL Needed (RRR)</div><div class="subtitle">(RRR) / day</div><div class="value" id="plRRR">-</div></div>
         </div>
 
-        <!-- NEW: Simple progress bars (no gauges) -->
         <div class="section-title">Performance Progress</div>
 
-        <div class="progress-wrap" style="margin-bottom:12px">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-            <div style="font-weight:700;color:var(--primary)">Pharma</div>
-            <div id="pharmaProgressPct" style="font-weight:800">-</div>
+        <div class="progress-wrap">
+          <div class="progress-label">
+            <span style="font-weight:700;color:var(--primary)">Pharma</span>
+            <span id="pharmaProgressPct" style="font-weight:800">-</span>
           </div>
-          <div class="progress-bar">
-            <div id="pharmaProgressInner" class="progress-bar-inner" style="width:0%"></div>
-          </div>
+          <div class="progress-bar"><div id="pharmaProgressInner" class="progress-bar-inner"></div></div>
           <div class="progress-small" id="pharmaProgressText">-</div>
         </div>
 
-        <div class="progress-wrap">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-            <div style="font-weight:700;color:var(--primary)">PL</div>
-            <div id="plProgressPct" style="font-weight:800">-</div>
+        <div class="progress-wrap" style="margin-top:12px">
+          <div class="progress-label">
+            <span style="font-weight:700;color:var(--primary)">PL</span>
+            <span id="plProgressPct" style="font-weight:800">-</span>
           </div>
-          <div class="progress-bar">
-            <div id="plProgressInner" class="progress-bar-inner" style="width:0%"></div>
-          </div>
+          <div class="progress-bar"><div id="plProgressInner" class="progress-bar-inner"></div></div>
           <div class="progress-small" id="plProgressText">-</div>
         </div>
 
       </div>
 
-      <!-- RIGHT -->
+      <!-- RIGHT COLUMN -->
       <div class="card">
+
         <div class="section-title">Rank</div>
         <div class="rank-box">
           <div style="font-size:13px;opacity:0.95">Your Rank</div>
@@ -196,192 +161,221 @@
           </div>
         </div>
 
+        <!-- RETURN SECTION (INSIDE RIGHT CARD) -->
+        <div class="trend-box">
+          <div class="return-box-title">Pharma Return</div>
+          <div style="display:flex;justify-content:space-between;margin-top:10px">
+            <div><div style="font-size:12px;color:var(--muted)">Return</div><div class="return-value" id="pharma_return">-</div></div>
+            <div><div style="font-size:12px;color:var(--muted)">Return %</div><div class="return-percent" id="pharma_return_percent">-</div></div>
+          </div>
+        </div>
+
+        <div class="trend-box">
+          <div class="return-box-title">PL Return</div>
+          <div style="display:flex;justify-content:space-between;margin-top:10px">
+            <div><div style="font-size:12px;color:var(--muted)">Return</div><div class="return-value" id="pl_return">-</div></div>
+            <div><div style="font-size:12px;color:var(--muted)">Return %</div><div class="return-percent" id="pl_return_percent">-</div></div>
+          </div>
+        </div>
+
       </div>
     </main>
   </div>
 
-  <!-- Return Section -->
-<div class="trend-box" style="margin-top:20px">
-    <div style="font-weight:700;color:#b91c1c">Pharma Return</div>
-    <div style="display:flex;justify-content:space-between;margin-top:10px">
-        <div>
-            <div style="font-size:12px;color:var(--muted)">Return</div>
-            <div id="pharma_return" style="font-weight:700;color:#b91c1c">-</div>
-        </div>
-        <div>
-            <div style="font-size:12px;color:var(--muted)">Return %</div>
-            <div id="pharma_return_percent" style="font-weight:700;color:#b91c1c">-</div>
-        </div>
-    </div>
-</div>
+<script>
+/* Firebase config */
+const firebaseConfig = {
+  apiKey: "AIzaSyAtdeN84prygknfyF-aZ7d6Wr0m2LYSFek",
+  authDomain: "salesdashboard-8a33e.firebaseapp.com",
+  projectId: "salesdashboard-8a33e",
+  storageBucket: "salesdashboard-8a33e.firebasestorage.app",
+  messagingSenderId: "939228252310",
+  appId: "1:939228252310:web:c847ef8b0afc92e7495ab7"
+};
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
 
-<div class="trend-box" style="margin-top:15px">
-    <div style="font-weight:700;color:#b91c1c">PL Return</div>
-    <div style="display:flex;justify-content:space-between;margin-top:10px">
-        <div>
-            <div style="font-size:12px;color:var(--muted)">Return</div>
-            <div id="pl_return" style="font-weight:700;color:#b91c1c">-</div>
-        </div>
-        <div>
-            <div style="font-size:12px;color:var(--muted)">Return %</div>
-            <div id="pl_return_percent" style="font-weight:700;color:#b91c1c">-</div>
-        </div>
-    </div>
-</div>
+/* Helpers */
+function safeNum(v){
+  if(v===undefined || v===null || v==="") return 0;
+  v = (v+"").replace(/,/g,"").trim();
+  return Number(v)||0;
+}
+function fmtMoney(n){ return new Intl.NumberFormat("en-IN").format(Math.round(n)); }
 
-  <script>
-    /* Firebase config */
-    const firebaseConfig = {
-      apiKey: "AIzaSyAtdeN84prygknfyF-aZ7d6Wr0m2LYSFek",
-      authDomain: "salesdashboard-8a33e.firebaseapp.com",
-      projectId: "salesdashboard-8a33e",
-      storageBucket: "salesdashboard-8a33e.firebasestorage.app",
-      messagingSenderId: "939228252310",
-      appId: "1:939228252310:web:c847ef8b0afc92e7495ab7"
-    };
-    firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
+function countWorkingDaysTillToday() {
+  const today=new Date(); const y=today.getFullYear(), m=today.getMonth(), d=today.getDate();
+  let wd=0; for(let i=1;i<=d;i++){ const dt=new Date(y,m,i); if(dt.getDay()!==0) wd++; }
+  return Math.max(1,wd);
+}
 
-    /* Helpers */
-    function safeNum(v){ if(v===undefined||v===null||v==="") return 0; v=(v+"").replace(/,/g,"").trim(); return Number(v)||0; }
-    function fmtMoney(n){ return new Intl.NumberFormat("en-IN").format(Math.round(n)); }
+function countRemainingWorkingDays() {
+  const today=new Date(); const y=today.getFullYear(), m=today.getMonth(); const last=new Date(y,m+1,0).getDate();
+  let rem=0;
+  for(let i=today.getDate()+1;i<=last;i++){ const dt=new Date(y,m,i); if(dt.getDay()!==0) rem++; }
+  return rem;
+}
 
-    function countWorkingDaysTillToday() {
-      const today=new Date(); const y=today.getFullYear(), m=today.getMonth(), d=today.getDate();
-      let wd=0; for(let i=1;i<=d;i++){ const dt=new Date(y,m,i); if(dt.getDay()!==0) wd++; } return Math.max(1,wd);
+function countWorkingDaysTotal() {
+  const today=new Date(); const y=today.getFullYear(), m=today.getMonth(); const last=new Date(y,m+1,0).getDate();
+  let total=0;
+  for(let i=1;i<=last;i++){ const dt=new Date(y,m,i); if(dt.getDay()!==0) total++; }
+  return Math.max(1,total);
+}
+
+const API_URL = "https://script.google.com/macros/s/AKfycbwHPdcB4MLaKu3VUDNfpkpiWEvnz3nRhwbbna0-5dn0dlO-ICf6913k8n9yMScc3fO8/exec";
+
+/* Login states */
+auth.onAuthStateChanged(user=>{
+  if(user){
+    document.getElementById("loginBtn").style.display="none";
+    document.getElementById("logoutBtn").style.display="inline-block";
+    document.getElementById("userInfo").textContent = user.email;
+    loadDataForUser(user.email);
+  } else {
+    document.getElementById("loginBtn").style.display="inline-block";
+    document.getElementById("logoutBtn").style.display="none";
+    document.getElementById("userInfo").textContent = "Please login";
+  }
+});
+
+document.getElementById("loginBtn").onclick = ()=>{
+  const provider = new firebase.auth.GoogleAuthProvider();
+  auth.signInWithPopup(provider);
+};
+document.getElementById("logoutBtn").onclick = ()=>auth.signOut();
+
+/* Return section calculation */
+function updateReturnSection(row){
+
+  const pharmaReturn = safeNum(row["Pharma Return"]);
+  const plReturn = safeNum(row["PL Return"]);
+
+  const pharmaSales = safeNum(row.pharmaSales);
+  const plSales = safeNum(row.plSales);
+
+  let phReturnPct = 0;
+  if ((pharmaSales + pharmaReturn) > 0)
+      phReturnPct = Math.round((pharmaReturn / (pharmaSales + pharmaReturn)) * 100);
+
+  let plReturnPct = 0;
+  if ((plSales + plReturn) > 0)
+      plReturnPct = Math.round((plReturn / (plSales + plReturn)) * 100);
+
+  document.getElementById("pharma_return").textContent = pharmaReturn ? fmtMoney(pharmaReturn) : "-";
+  document.getElementById("pharma_return_percent").textContent = phReturnPct + "%";
+
+  document.getElementById("pl_return").textContent = plReturn ? fmtMoney(plReturn) : "-";
+  document.getElementById("pl_return_percent").textContent = plReturnPct + "%";
+}
+
+/* Main data loader */
+async function loadDataForUser(email){
+  try {
+    const res = await fetch(API_URL + "?email=" + encodeURIComponent(email));
+    const data = await res.json();
+    if(!data || !data.length){ alert("No sales data for this email"); return; }
+    const row = data[0];
+
+    const tPh = safeNum(row.targetPharma);
+    const aPh = safeNum(row.pharmaSales);
+    const pPh = safeNum(row.pendingPharma);
+    const tPl = safeNum(row.targetPL);
+    const aPl = safeNum(row.plSales);
+    const pPl = safeNum(row.pendingPL);
+
+    document.getElementById("targetPharma").textContent=fmtMoney(tPh);
+    document.getElementById("pharmaSales").textContent=fmtMoney(aPh);
+    document.getElementById("pendingPharma").textContent=fmtMoney(pPh);
+
+    const phPctVal = Number(String(row.achievedPharmaPercent).replace(/,/g,''))||0;
+    document.getElementById("achievedPharmaPercent").textContent = Math.round(phPctVal)+"%";
+
+    document.getElementById("targetPL").textContent=fmtMoney(tPl);
+    document.getElementById("plSales").textContent=fmtMoney(aPl);
+    document.getElementById("pendingPL").textContent=fmtMoney(pPl);
+
+    const plPctVal = Number(String(row.achievedPLPercent).replace(/,/g,''))||0;
+    document.getElementById("achievedPLPercent").textContent = Math.round(plPctVal)+"%";
+
+    const Wpassed = countWorkingDaysTillToday();
+    const Wrem = countRemainingWorkingDays();
+    const Wtotal = countWorkingDaysTotal();
+
+    const phCRR = Math.round(aPh / Wpassed);
+    document.getElementById("pharmaCRR").textContent = phCRR===0? "-" : fmtMoney(phCRR);
+
+    const phRRR = Wrem>0 ? Math.ceil(Math.max(0,tPh-aPh)/Wrem) : Math.max(0,tPh - aPh);
+    document.getElementById("pharmaRRR").textContent = fmtMoney(phRRR);
+
+    const plCRR = Math.round(aPl / Wpassed);
+    document.getElementById("plCRR").textContent = plCRR===0? "-" : fmtMoney(plCRR);
+
+    const plRRR = Wrem>0 ? Math.ceil(Math.max(0,tPl-aPl)/Wrem) : Math.max(0,tPl - aPl);
+    document.getElementById("plRRR").textContent = fmtMoney(plRRR);
+
+    const phProjected = Math.round(phCRR * Wtotal);
+    const phGap = Math.max(0, tPh - phProjected);
+    document.getElementById("trend_pharma_crr").textContent = phCRR===0? "-" : fmtMoney(phCRR);
+    document.getElementById("trend_pharma_projected").textContent = fmtMoney(phProjected);
+    document.getElementById("trend_pharma_gap").textContent = fmtMoney(phGap);
+
+    const plProjected = Math.round(plCRR * Wtotal);
+    const plGap = Math.max(0, tPl - plProjected);
+    document.getElementById("trend_pl_crr").textContent = plCRR===0? "-" : fmtMoney(plCRR);
+    document.getElementById("trend_pl_projected").textContent = fmtMoney(plProjected);
+    document.getElementById("trend_pl_gap").textContent = fmtMoney(plGap);
+
+    const phPct = tPh === 0 ? 0 : Math.min(100, Math.round((aPh/tPh)*100));
+    const plPct = tPl === 0 ? 0 : Math.min(100, Math.round((aPl/tPl)*100));
+
+    document.getElementById("pharmaProgressInner").style.width = phPct + "%";
+    document.getElementById("pharmaProgressPct").textContent = phPct + "%";
+    document.getElementById("pharmaProgressText").textContent = fmtMoney(aPh)+" / "+fmtMoney(tPh);
+
+    document.getElementById("plProgressInner").style.width = plPct + "%";
+    document.getElementById("plProgressPct").textContent = plPct + "%";
+    document.getElementById("plProgressText").textContent = fmtMoney(aPl)+" / "+fmtMoney(tPl);
+
+    computeRank(email);
+
+    updateReturnSection(row);
+
+  } catch(err){
+    console.error(err);
+  }
+}
+
+/* Ranking */
+async function computeRank(email){
+  try {
+    const res = await fetch(API_URL + "?all=true");
+    const all = await res.json();
+    if(!all || !all.length){
+      document.getElementById("rankValue").textContent="-";
+      return;
     }
-    function countRemainingWorkingDays() {
-      const today=new Date(); const y=today.getFullYear(), m=today.getMonth(); const last=new Date(y,m+1,0).getDate();
-      let rem=0; for(let i=today.getDate()+1;i<=last;i++){ const dt=new Date(y,m,i); if(dt.getDay()!==0) rem++; } return rem;
-    }
-    function countWorkingDaysTotal() {
-      const today=new Date(); const y=today.getFullYear(), m=today.getMonth(); const last=new Date(y,m+1,0).getDate();
-      let total=0; for(let i=1;i<=last;i++){ const dt=new Date(y,m,i); if(dt.getDay()!==0) total++; } return Math.max(1,total);
-    }
 
-    const API_URL = "https://script.google.com/macros/s/AKfycbwHPdcB4MLaKu3VUDNfpkpiWEvnz3nRhwbbna0-5dn0dlO-ICf6913k8n9yMScc3fO8/exec";
-
-    /* Auth handling */
-    auth.onAuthStateChanged(user=>{
-      if(user){
-        document.getElementById("loginBtn").style.display="none";
-        document.getElementById("logoutBtn").style.display="inline-block";
-        const photo = user.photoURL || "";
-        document.getElementById("userInfo").innerHTML = (photo? `<img src='${photo}' style='width:34px;height:34px;border-radius:999px;margin-right:8px;object-fit:cover'>` : "") + (user.displayName || user.email);
-        loadDataForUser(user.email);
-      } else {
-        document.getElementById("loginBtn").style.display="inline-block";
-        document.getElementById("logoutBtn").style.display="none";
-        document.getElementById("userInfo").textContent = "Please login";
-      }
+    const scores = all.map(r=>{
+      let p = Number(String(r.achievedPharmaPercent).replace(/,/g,''))||0;
+      let l = Number(String(r.achievedPLPercent).replace(/,/g,''))||0;
+      if(p>0 && p<=1) p*=100;
+      if(l>0 && l<=1) l*=100;
+      return {
+        email:(r.email||"").toLowerCase().trim(),
+        score:p+l
+      };
     });
 
-    document.getElementById("loginBtn").onclick = ()=> {
-      const provider = new firebase.auth.GoogleAuthProvider();
-      auth.signInWithPopup(provider).catch(e=>console.error(e));
-    };
-    document.getElementById("logoutBtn").onclick = ()=> auth.signOut();
+    scores.sort((a,b)=>b.score-a.score);
+    const idx = scores.findIndex(s=>s.email === (email||"").toLowerCase().trim());
+    document.getElementById("rankValue").textContent = idx===-1?"-":(idx+1);
 
-    /* Load data and populate UI (no gauges) */
-    async function loadDataForUser(email){
-      try {
-        const res = await fetch(API_URL + "?email=" + encodeURIComponent(email));
-        const data = await res.json();
-        if(!data || !data.length){ alert("No sales data for this email"); return; }
-        const row = data[0];
+  } catch(e){
+    document.getElementById("rankValue").textContent="-";
+  }
+}
 
-        const tPh = safeNum(row.targetPharma);
-        const aPh = safeNum(row.pharmaSales);
-        const pPh = safeNum(row.pendingPharma);
-        const tPl = safeNum(row.targetPL);
-        const aPl = safeNum(row.plSales);
-        const pPl = safeNum(row.pendingPL);
-
-        // KPIs
-        document.getElementById("targetPharma").textContent = fmtMoney(tPh);
-        document.getElementById("pharmaSales").textContent = fmtMoney(aPh);
-        document.getElementById("pendingPharma").textContent = fmtMoney(pPh);
-        const phPctRaw = Number(String(row.achievedPharmaPercent).replace(/,/g,'')) || 0;
-        document.getElementById("achievedPharmaPercent").textContent = (phPctRaw>0 && phPctRaw<=1) ? Math.round(phPctRaw*100)+"%" : Math.round(phPctRaw)+"%";
-
-        document.getElementById("targetPL").textContent = fmtMoney(tPl);
-        document.getElementById("plSales").textContent = fmtMoney(aPl);
-        document.getElementById("pendingPL").textContent = fmtMoney(pPl);
-        const plPctRaw = Number(String(row.achievedPLPercent).replace(/,/g,'')) || 0;
-        document.getElementById("achievedPLPercent").textContent = (plPctRaw>0 && plPctRaw<=1) ? Math.round(plPctRaw*100)+"%" : Math.round(plPctRaw)+"%";
-
-        // Run rates & projection
-        const Wpassed = countWorkingDaysTillToday();
-        const Wrem = countRemainingWorkingDays();
-        const Wtotal = countWorkingDaysTotal();
-
-        const pharmaCRR = Math.round(aPh / Math.max(1,Wpassed));
-        const pharmaRRR = Wrem>0 ? Math.ceil(Math.max(0,tPh - aPh)/Wrem) : Math.max(0,tPh - aPh);
-        document.getElementById("pharmaCRR").textContent = pharmaCRR===0? "-" : fmtMoney(pharmaCRR);
-        document.getElementById("pharmaRRR").textContent = fmtMoney(pharmaRRR);
-
-        const plCRR = Math.round(aPl / Math.max(1,Wpassed));
-        const plRRR = Wrem>0 ? Math.ceil(Math.max(0,tPl - aPl)/Wrem) : Math.max(0,tPl - aPl);
-        document.getElementById("plCRR").textContent = plCRR===0? "-" : fmtMoney(plCRR);
-        document.getElementById("plRRR").textContent = fmtMoney(plRRR);
-
-        const pharmaProjected = Math.round(pharmaCRR * Wtotal);
-        const pharmaProjectedGap = Math.max(0, tPh - pharmaProjected);
-        document.getElementById("trend_pharma_crr").textContent = pharmaCRR===0? "-" : fmtMoney(pharmaCRR);
-        document.getElementById("trend_pharma_projected").textContent = fmtMoney(pharmaProjected);
-        document.getElementById("trend_pharma_gap").textContent = fmtMoney(pharmaProjectedGap);
-
-        const plProjected = Math.round(plCRR * Wtotal);
-        const plProjectedGap = Math.max(0, tPl - plProjected);
-        document.getElementById("trend_pl_crr").textContent = plCRR===0? "-" : fmtMoney(plCRR);
-        document.getElementById("trend_pl_projected").textContent = fmtMoney(plProjected);
-        document.getElementById("trend_pl_gap").textContent = fmtMoney(plProjectedGap);
-
-        // PROGRESS BARS (no gauges)
-        const pPhPct = tPh === 0 ? 0 : Math.min(100, Math.round((aPh / tPh) * 100));
-        const pPlPct = tPl === 0 ? 0 : Math.min(100, Math.round((aPl / tPl) * 100));
-
-        document.getElementById("pharmaProgressInner").style.width = pPhPct + "%";
-        document.getElementById("pharmaProgressPct").textContent = pPhPct + "%";
-        document.getElementById("pharmaProgressText").textContent = fmtMoney(aPh) + " / " + fmtMoney(tPh);
-
-        document.getElementById("plProgressInner").style.width = pPlPct + "%";
-        document.getElementById("plProgressPct").textContent = pPlPct + "%";
-        document.getElementById("plProgressText").textContent = fmtMoney(aPl) + " / " + fmtMoney(tPl);
-
-        // rank
-        computeRank(email);
-
-      } catch(err){
-        console.error("Load error", err);
-        alert("Unable to load sales data — check Apps Script API.");
-      }
-    }
-
-    /* compute rank */
-    async function computeRank(email){
-      try {
-        const res = await fetch(API_URL + "?all=true");
-        const all = await res.json();
-        if(!all || !all.length){ document.getElementById("rankValue").textContent = "-"; return; }
-        const scores = all.map(r=>{
-          let p = Number(String(r.achievedPharmaPercent).replace(/,/g,''))||0;
-          let l = Number(String(r.achievedPLPercent).replace(/,/g,''))||0;
-          if(p>0 && p<=1) p *= 100;
-          if(l>0 && l<=1) l *= 100;
-          return { email:(r.email||"").toLowerCase().trim(), score: p + l };
-        });
-        scores.sort((a,b)=>b.score - a.score);
-        const idx = scores.findIndex(s => s.email === (email||"").toLowerCase().trim());
-        document.getElementById("rankValue").textContent = idx === -1 ? "-" : (idx+1);
-      } catch(e){
-        console.error("Rank error", e);
-        document.getElementById("rankValue").textContent = "-";
-      }
-    }
-
-  </script>
+</script>
 </body>
 </html>
-
-
