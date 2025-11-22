@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>Sales Dashboard — Clean</title>
+  <title>Sales Dashboard — Manager Enabled</title>
   <meta name="viewport" content="width=device-width,initial-scale=1" />
 
   <!-- Firebase v8 (auth) -->
@@ -59,6 +59,7 @@
     .return-value{font-weight:700;color:#b91c1c;font-size:18px}
     .return-percent{font-weight:700;color:#b91c1c;font-size:18px}
 
+    select#managerSelect{padding:8px;border-radius:8px;border:1px solid #d1d5db;background:#fff}
     @media (max-width:980px){ .grid{grid-template-columns:1fr} }
   </style>
 </head>
@@ -73,16 +74,20 @@
 
       <div class="top-right">
         <div id="userInfo" style="color:var(--muted)">Please login</div>
+
+        <!-- Manager Select will appear here (for managers only) -->
+        <select id="managerSelect" style="display:none">
+          <option value="">Select Salesman</option>
+        </select>
+
         <button id="loginBtn" class="btn btn-primary">Login with Google</button>
         <button id="logoutBtn" class="btn btn-outline" style="display:none">Logout</button>
       </div>
     </header>
 
     <main class="grid">
-      
-      <!-- LEFT COLUMN -->
+      <!-- LEFT (same as before) -->
       <div class="card">
-
         <div class="section-title">Pharma Performance</div>
         <div class="kpi" style="margin-bottom:12px">
           <div class="tile"><h4>Target Pharma</h4><p id="targetPharma">-</p></div>
@@ -112,7 +117,6 @@
         </div>
 
         <div class="section-title">Performance Progress</div>
-
         <div class="progress-wrap">
           <div class="progress-label">
             <span style="font-weight:700;color:var(--primary)">Pharma</span>
@@ -130,12 +134,10 @@
           <div class="progress-bar"><div id="plProgressInner" class="progress-bar-inner"></div></div>
           <div class="progress-small" id="plProgressText">-</div>
         </div>
-
       </div>
 
-      <!-- RIGHT COLUMN -->
+      <!-- RIGHT (Rank & Projections & Return inside right card) -->
       <div class="card">
-
         <div class="section-title">Rank</div>
         <div class="rank-box">
           <div style="font-size:13px;opacity:0.95">Your Rank</div>
@@ -161,7 +163,6 @@
           </div>
         </div>
 
-        <!-- RETURN SECTION (INSIDE RIGHT CARD) -->
         <div class="trend-box">
           <div class="return-box-title">Pharma Return</div>
           <div style="display:flex;justify-content:space-between;margin-top:10px">
@@ -183,6 +184,20 @@
   </div>
 
 <script>
+/* ======= Configuration ======= */
+
+/* Managers — edit this list to add/remove managers */
+const MANAGERS = [
+  "jinesh.jain@apdpl.in",
+  "vmamys@gmail.com",
+  "harishdarera@gmail.com",
+  "cvjain1@gmail.com",
+  "aravindan.s@apdpl.in"
+];
+
+/* Apps Script API endpoint (do not change if your deployment is same) */
+const API_URL = "https://script.google.com/macros/s/AKfycbwHPdcB4MLaKu3VUDNfpkpiWEvnz3nRhwbbna0-5dn0dlO-ICf6913k8n9yMScc3fO8/exec";
+
 /* Firebase config */
 const firebaseConfig = {
   apiKey: "AIzaSyAtdeN84prygknfyF-aZ7d6Wr0m2LYSFek",
@@ -195,72 +210,81 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 
-/* Helpers */
-function safeNum(v){
-  if(v===undefined || v===null || v==="") return 0;
-  v = (v+"").replace(/,/g,"").trim();
-  return Number(v)||0;
-}
+/* ======= Helpers ======= */
+function safeNum(v){ if(v===undefined||v===null||v==="") return 0; v=(v+"").replace(/,/g,"").trim(); return Number(v)||0; }
 function fmtMoney(n){ return new Intl.NumberFormat("en-IN").format(Math.round(n)); }
+function countWorkingDaysTillToday(){ const today=new Date(); const y=today.getFullYear(), m=today.getMonth(), d=today.getDate(); let wd=0; for(let i=1;i<=d;i++){ const dt=new Date(y,m,i); if(dt.getDay()!==0) wd++; } return Math.max(1,wd); }
+function countRemainingWorkingDays(){ const today=new Date(); const y=today.getFullYear(), m=today.getMonth(); const last=new Date(y,m+1,0).getDate(); let rem=0; for(let i=today.getDate()+1;i<=last;i++){ const dt=new Date(y,m,i); if(dt.getDay()!==0) rem++; } return rem; }
+function countWorkingDaysTotal(){ const today=new Date(); const y=today.getFullYear(), m=today.getMonth(); const last=new Date(y,m+1,0).getDate(); let total=0; for(let i=1;i<=last;i++){ const dt=new Date(y,m,i); if(dt.getDay()!==0) total++; } return Math.max(1,total); }
 
-function countWorkingDaysTillToday() {
-  const today=new Date(); const y=today.getFullYear(), m=today.getMonth(), d=today.getDate();
-  let wd=0; for(let i=1;i<=d;i++){ const dt=new Date(y,m,i); if(dt.getDay()!==0) wd++; }
-  return Math.max(1,wd);
-}
-
-function countRemainingWorkingDays() {
-  const today=new Date(); const y=today.getFullYear(), m=today.getMonth(); const last=new Date(y,m+1,0).getDate();
-  let rem=0;
-  for(let i=today.getDate()+1;i<=last;i++){ const dt=new Date(y,m,i); if(dt.getDay()!==0) rem++; }
-  return rem;
-}
-
-function countWorkingDaysTotal() {
-  const today=new Date(); const y=today.getFullYear(), m=today.getMonth(); const last=new Date(y,m+1,0).getDate();
-  let total=0;
-  for(let i=1;i<=last;i++){ const dt=new Date(y,m,i); if(dt.getDay()!==0) total++; }
-  return Math.max(1,total);
-}
-
-const API_URL = "https://script.google.com/macros/s/AKfycbwHPdcB4MLaKu3VUDNfpkpiWEvnz3nRhwbbna0-5dn0dlO-ICf6913k8n9yMScc3fO8/exec";
-
-/* Login states */
-auth.onAuthStateChanged(user=>{
+/* ======= Auth & UI wiring ======= */
+auth.onAuthStateChanged(async user=>{
   if(user){
     document.getElementById("loginBtn").style.display="none";
     document.getElementById("logoutBtn").style.display="inline-block";
-    document.getElementById("userInfo").textContent = user.email;
-    loadDataForUser(user.email);
+    document.getElementById("userInfo").textContent = user.email || user.displayName || "User";
+
+    const email = (user.email||"").toLowerCase().trim();
+
+    // If manager -> show dropdown and populate
+    if(MANAGERS.map(m=>m.toLowerCase().trim()).includes(email)){
+      document.getElementById("managerSelect").style.display = "inline-block";
+      await populateManagerDropdown(); // loads salesmen from sheet
+    } else {
+      document.getElementById("managerSelect").style.display = "none";
+      // If salesman, load his own data
+      loadDataForUser(user.email);
+    }
   } else {
     document.getElementById("loginBtn").style.display="inline-block";
     document.getElementById("logoutBtn").style.display="none";
     document.getElementById("userInfo").textContent = "Please login";
+    document.getElementById("managerSelect").style.display = "none";
   }
 });
 
-document.getElementById("loginBtn").onclick = ()=>{
-  const provider = new firebase.auth.GoogleAuthProvider();
-  auth.signInWithPopup(provider);
-};
-document.getElementById("logoutBtn").onclick = ()=>auth.signOut();
+document.getElementById("loginBtn").onclick = ()=> { const provider = new firebase.auth.GoogleAuthProvider(); auth.signInWithPopup(provider).catch(e=>console.error(e)); };
+document.getElementById("logoutBtn").onclick = ()=> auth.signOut();
 
-/* Return section calculation */
+/* ======= Manager dropdown population ======= */
+async function populateManagerDropdown(){
+  try {
+    const res = await fetch(API_URL + "?all=true");
+    const rows = await res.json();
+    const sel = document.getElementById("managerSelect");
+    // wipe current options (keep first)
+    sel.innerHTML = '<option value="">Select Salesman</option>';
+    rows.forEach(r=>{
+      const name = r.salesmanName || r.salesman || r.salesmanname || "(Unnamed)";
+      const email = (r.email || "").toLowerCase().trim();
+      if(!email) return; // skip rows without email
+      const opt = document.createElement("option");
+      opt.value = email;
+      opt.textContent = name + " — " + email;
+      sel.appendChild(opt);
+    });
+    // on change -> load selected salesman
+    sel.onchange = function(){
+      const e = this.value;
+      if(e) loadDataForUser(e);
+    };
+  } catch(err){
+    console.error("Manager dropdown error", err);
+  }
+}
+
+/* ======= Return section calculation (same formula) ======= */
 function updateReturnSection(row){
-
   const pharmaReturn = safeNum(row["Pharma Return"]);
   const plReturn = safeNum(row["PL Return"]);
-
   const pharmaSales = safeNum(row.pharmaSales);
   const plSales = safeNum(row.plSales);
 
   let phReturnPct = 0;
-  if ((pharmaSales + pharmaReturn) > 0)
-      phReturnPct = Math.round((pharmaReturn / (pharmaSales + pharmaReturn)) * 100);
+  if ((pharmaSales + pharmaReturn) > 0) phReturnPct = Math.round((pharmaReturn / (pharmaSales + pharmaReturn)) * 100);
 
   let plReturnPct = 0;
-  if ((plSales + plReturn) > 0)
-      plReturnPct = Math.round((plReturn / (plSales + plReturn)) * 100);
+  if ((plSales + plReturn) > 0) plReturnPct = Math.round((plReturn / (plSales + plReturn)) * 100);
 
   document.getElementById("pharma_return").textContent = pharmaReturn ? fmtMoney(pharmaReturn) : "-";
   document.getElementById("pharma_return_percent").textContent = phReturnPct + "%";
@@ -269,20 +293,17 @@ function updateReturnSection(row){
   document.getElementById("pl_return_percent").textContent = plReturnPct + "%";
 }
 
-/* Main data loader */
+/* ======= Main loader (loads data for a given email) ======= */
 async function loadDataForUser(email){
+  if(!email) return;
   try {
     const res = await fetch(API_URL + "?email=" + encodeURIComponent(email));
     const data = await res.json();
-    if(!data || !data.length){ alert("No sales data for this email"); return; }
+    if(!data || !data.length){ alert("No sales data for this email: " + email); return; }
     const row = data[0];
 
-    const tPh = safeNum(row.targetPharma);
-    const aPh = safeNum(row.pharmaSales);
-    const pPh = safeNum(row.pendingPharma);
-    const tPl = safeNum(row.targetPL);
-    const aPl = safeNum(row.plSales);
-    const pPl = safeNum(row.pendingPL);
+    const tPh = safeNum(row.targetPharma), aPh = safeNum(row.pharmaSales), pPh = safeNum(row.pendingPharma);
+    const tPl = safeNum(row.targetPL), aPl = safeNum(row.plSales), pPl = safeNum(row.pendingPL);
 
     document.getElementById("targetPharma").textContent=fmtMoney(tPh);
     document.getElementById("pharmaSales").textContent=fmtMoney(aPh);
@@ -298,30 +319,26 @@ async function loadDataForUser(email){
     const plPctVal = Number(String(row.achievedPLPercent).replace(/,/g,''))||0;
     document.getElementById("achievedPLPercent").textContent = Math.round(plPctVal)+"%";
 
-    const Wpassed = countWorkingDaysTillToday();
-    const Wrem = countRemainingWorkingDays();
-    const Wtotal = countWorkingDaysTotal();
+    const Wpassed = countWorkingDaysTillToday(), Wrem = countRemainingWorkingDays(), Wtotal = countWorkingDaysTotal();
 
-    const phCRR = Math.round(aPh / Wpassed);
+    const phCRR = Math.round(aPh / Math.max(1,Wpassed));
     document.getElementById("pharmaCRR").textContent = phCRR===0? "-" : fmtMoney(phCRR);
 
     const phRRR = Wrem>0 ? Math.ceil(Math.max(0,tPh-aPh)/Wrem) : Math.max(0,tPh - aPh);
     document.getElementById("pharmaRRR").textContent = fmtMoney(phRRR);
 
-    const plCRR = Math.round(aPl / Wpassed);
+    const plCRR = Math.round(aPl / Math.max(1,Wpassed));
     document.getElementById("plCRR").textContent = plCRR===0? "-" : fmtMoney(plCRR);
 
     const plRRR = Wrem>0 ? Math.ceil(Math.max(0,tPl-aPl)/Wrem) : Math.max(0,tPl - aPl);
     document.getElementById("plRRR").textContent = fmtMoney(plRRR);
 
-    const phProjected = Math.round(phCRR * Wtotal);
-    const phGap = Math.max(0, tPh - phProjected);
+    const phProjected = Math.round(phCRR * Wtotal), phGap = Math.max(0, tPh - phProjected);
     document.getElementById("trend_pharma_crr").textContent = phCRR===0? "-" : fmtMoney(phCRR);
     document.getElementById("trend_pharma_projected").textContent = fmtMoney(phProjected);
     document.getElementById("trend_pharma_gap").textContent = fmtMoney(phGap);
 
-    const plProjected = Math.round(plCRR * Wtotal);
-    const plGap = Math.max(0, tPl - plProjected);
+    const plProjected = Math.round(plCRR * Wtotal), plGap = Math.max(0, tPl - plProjected);
     document.getElementById("trend_pl_crr").textContent = plCRR===0? "-" : fmtMoney(plCRR);
     document.getElementById("trend_pl_projected").textContent = fmtMoney(plProjected);
     document.getElementById("trend_pl_gap").textContent = fmtMoney(plGap);
@@ -337,42 +354,37 @@ async function loadDataForUser(email){
     document.getElementById("plProgressPct").textContent = plPct + "%";
     document.getElementById("plProgressText").textContent = fmtMoney(aPl)+" / "+fmtMoney(tPl);
 
+    // update rank (recomputes from all rows)
     computeRank(email);
 
+    // update returns
     updateReturnSection(row);
 
   } catch(err){
-    console.error(err);
+    console.error("loadDataForUser error", err);
+    alert("Unable to load data for " + email);
   }
 }
 
-/* Ranking */
+/* ======= Ranking (unchanged) ======= */
 async function computeRank(email){
   try {
     const res = await fetch(API_URL + "?all=true");
     const all = await res.json();
-    if(!all || !all.length){
-      document.getElementById("rankValue").textContent="-";
-      return;
-    }
-
+    if(!all || !all.length){ document.getElementById("rankValue").textContent="-"; return; }
     const scores = all.map(r=>{
       let p = Number(String(r.achievedPharmaPercent).replace(/,/g,''))||0;
       let l = Number(String(r.achievedPLPercent).replace(/,/g,''))||0;
-      if(p>0 && p<=1) p*=100;
-      if(l>0 && l<=1) l*=100;
-      return {
-        email:(r.email||"").toLowerCase().trim(),
-        score:p+l
-      };
+      if(p>0 && p<=1) p *= 100;
+      if(l>0 && l<=1) l *= 100;
+      return { email:(r.email||"").toLowerCase().trim(), score: p + l };
     });
-
-    scores.sort((a,b)=>b.score-a.score);
-    const idx = scores.findIndex(s=>s.email === (email||"").toLowerCase().trim());
-    document.getElementById("rankValue").textContent = idx===-1?"-":(idx+1);
-
+    scores.sort((a,b)=>b.score - a.score);
+    const idx = scores.findIndex(s => s.email === (email||"").toLowerCase().trim());
+    document.getElementById("rankValue").textContent = idx === -1 ? "-" : (idx+1);
   } catch(e){
-    document.getElementById("rankValue").textContent="-";
+    console.error("computeRank", e);
+    document.getElementById("rankValue").textContent = "-";
   }
 }
 
