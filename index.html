@@ -316,15 +316,17 @@ function populateDashboardFromRow(row){
   document.getElementById("pharmaSales").textContent = fmtMoney(aPh);
   document.getElementById("pendingPharma").textContent = fmtMoney(pPh);
 
-  const phPctVal = Number(String(row.achievedPharmaPercent).replace(/,/g,''))||0;
-  document.getElementById("achievedPharmaPercent").textContent = Math.round(phPctVal) + "%";
+ const pharmaPercent = tPh === 0 ? 0 : Math.round((aPh / tPh) * 100);
+document.getElementById("achievedPharmaPercent").textContent = pharmaPercent + "%";
+
 
   document.getElementById("targetPL").textContent = fmtMoney(tPl);
   document.getElementById("plSales").textContent = fmtMoney(aPl);
   document.getElementById("pendingPL").textContent = fmtMoney(pPl);
 
-  const plPctVal = Number(String(row.achievedPLPercent).replace(/,/g,''))||0;
-  document.getElementById("achievedPLPercent").textContent = Math.round(plPctVal) + "%";
+const plPercent = tPl === 0 ? 0 : Math.round((aPl / tPl) * 100);
+document.getElementById("achievedPLPercent").textContent = plPercent + "%";
+
 
   const Wpassed = countWorkingDaysTillToday(), Wrem = countRemainingWorkingDays(), Wtotal = countWorkingDaysTotal();
 
@@ -400,4 +402,5 @@ async function computeRank(email){
 </script>
 </body>
 </html>
+
 
